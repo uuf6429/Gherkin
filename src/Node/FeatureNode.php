@@ -24,95 +24,34 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
     use TaggedNodeTrait;
 
     /**
-     * @var string|null
-     */
-    private $title;
-    /**
-     * @var string|null
-     */
-    private $description;
-    /**
-     * @var string[]
-     */
-    private $tags = [];
-    /**
-     * @var BackgroundNode|null
-     */
-    private $background;
-    /**
-     * @var ScenarioInterface[]
-     */
-    private $scenarios = [];
-    /**
-     * @var string
-     */
-    private $keyword;
-    /**
-     * @var string
-     */
-    private $language;
-    /**
-     * @var string|null
-     */
-    private $file;
-    /**
-     * @var int
-     */
-    private $line;
-
-    /**
      * Initializes feature.
      *
-     * @param string|null $title
-     * @param string|null $description
-     * @param string[] $tags
-     * @param ScenarioInterface[] $scenarios
-     * @param string $keyword
-     * @param string $language
+     * @param list<string> $tags
+     * @param list<ScenarioInterface> $scenarios
      * @param string|null $file the absolute path to the feature file
-     * @param int $line
      */
     public function __construct(
-        $title,
-        $description,
-        array $tags,
-        ?BackgroundNode $background,
-        array $scenarios,
-        $keyword,
-        $language,
-        $file,
-        $line,
+        private readonly ?string $title,
+        private readonly ?string $description,
+        private readonly array $tags,
+        private readonly ?BackgroundNode $background,
+        private readonly array $scenarios,
+        private readonly string $keyword,
+        private readonly string $language,
+        private readonly ?string $file,
+        private readonly int $line,
     ) {
         // Verify that the feature file is an absolute path.
         if (!empty($file) && !$this->isAbsolutePath($file)) {
             throw new InvalidArgumentException('The file should be an absolute path.');
         }
-        $this->title = $title;
-        $this->description = $description;
-        $this->tags = $tags;
-        $this->background = $background;
-        $this->scenarios = $scenarios;
-        $this->keyword = $keyword;
-        $this->language = $language;
-        $this->file = $file;
-        $this->line = $line;
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Feature';
     }
 
-    /**
-     * Returns feature title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
@@ -176,18 +115,13 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
     /**
      * Returns feature scenarios.
      *
-     * @return ScenarioInterface[]
+     * @return list<ScenarioInterface>
      */
     public function getScenarios()
     {
         return $this->scenarios;
     }
 
-    /**
-     * Returns feature keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
@@ -213,11 +147,6 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         return $this->file;
     }
 
-    /**
-     * Returns feature declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

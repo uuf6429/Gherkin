@@ -14,41 +14,28 @@ namespace Behat\Gherkin\Node;
  * Represents Gherkin Outline Example Table.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @phpstan-import-type TTable from TableNode
  */
 class ExampleTableNode extends TableNode implements TaggedNodeInterface
 {
     use TaggedNodeTrait;
 
     /**
-     * @var string[]
-     */
-    private $tags;
-
-    /**
-     * @var string
-     */
-    private $keyword;
-
-    /**
      * Initializes example table.
      *
-     * @param array $table Table in form of [$rowLineNumber => [$val1, $val2, $val3]]
-     * @param string $keyword
-     * @param string[] $tags
+     * @phpstan-param TTable $table Table in form of [$rowLineNumber => [$val1, $val2, $val3]]
+     *
+     * @param list<string> $tags
      */
-    public function __construct(array $table, $keyword, array $tags = [])
-    {
-        $this->keyword = $keyword;
-        $this->tags = $tags;
-
+    public function __construct(
+        array $table,
+        private readonly string $keyword,
+        private readonly array $tags = [],
+    ) {
         parent::__construct($table);
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'ExampleTable';

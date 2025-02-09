@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlFileLoader extends AbstractFileLoader
 {
-    private $loader;
+    private ArrayLoader $loader;
 
     public function __construct()
     {
@@ -52,8 +52,13 @@ class YamlFileLoader extends AbstractFileLoader
     public function load($resource)
     {
         $path = $this->getAbsolutePath($resource);
-        $hash = Yaml::parse(file_get_contents($path));
+        $data = file_get_contents($path);
+        if ($data === false) {
+            throw new \RuntimeException("File could not be read: $path");
+        }
+        $hash = Yaml::parse($data);
 
+        // @phpstan-ignore-next-line
         $features = $this->loader->load($hash);
 
         return array_map(

@@ -14,6 +14,7 @@ use Behat\Gherkin\Exception\LexerException;
 use Behat\Gherkin\Exception\NodeException;
 use Behat\Gherkin\Exception\ParserException;
 use Behat\Gherkin\Exception\UnexpectedParserNodeException;
+use Behat\Gherkin\Keywords\KeywordsInterface;
 use Behat\Gherkin\Node\BackgroundNode;
 use Behat\Gherkin\Node\ExampleTableNode;
 use Behat\Gherkin\Node\FeatureNode;
@@ -27,32 +28,45 @@ use Behat\Gherkin\Node\TableNode;
 /**
  * Gherkin parser.
  *
+ * ```
  * $lexer  = new Behat\Gherkin\Lexer($keywords);
  * $parser = new Behat\Gherkin\Parser($lexer);
  * $featuresArray = $parser->parse('/path/to/feature.feature');
+ * ```
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  *
  * @phpstan-type TParsedExpressionResult FeatureNode|BackgroundNode|ScenarioNode|OutlineNode|ExampleTableNode|TableNode|PyStringNode|StepNode|string
+ *
+ * @phpstan-import-type TToken from Lexer
+ * @phpstan-import-type TTagToken from Lexer
+ * @phpstan-import-type TStepToken from Lexer
+ * @phpstan-import-type TKeywordToken from Lexer
+ * @phpstan-import-type TTableRowToken from Lexer
+ * @phpstan-import-type TGeneralKeywordsType from KeywordsInterface
  */
 class Parser
 {
-    private $lexer;
-    private $input;
-    private $file;
-    private $tags = [];
-    private $languageSpecifierLine;
-
-    private $passedNodesStack = [];
+    private string $input;
+    private ?string $file;
+    /**
+     * @var list<string>
+     */
+    private array $tags = [];
+    private ?int $languageSpecifierLine;
+    /**
+     * @var list<'Feature'|'Scenario'|'Outline'|'Step'>
+     */
+    private array $passedNodesStack = [];
 
     /**
      * Initializes parser.
      *
      * @param Lexer $lexer Lexer instance
      */
-    public function __construct(Lexer $lexer)
-    {
-        $this->lexer = $lexer;
+    public function __construct(
+        private readonly Lexer $lexer,
+    ) {
     }
 
     /**
@@ -113,7 +127,7 @@ class Parser
             if (!$node instanceof FeatureNode) {
                 throw new ParserException(sprintf(
                     'Expected Feature, but got %s on line: %d%s',
-                    $node->getKeyword(),
+                    method_exists($node, 'getKeyword') ? $node->getKeyword() : null,
                     $node->getLine(),
                     $this->file ? ' in file: ' . $this->file : ''
                 ));
@@ -128,14 +142,24 @@ class Parser
      *
      * @param string $type Token type
      *
-     * @return array
+     * @phpstan-return (
+     *     $type is 'TableRow'
+     *         ? TTableRowToken
+     *         : ($type is 'Tag'
+     *             ? TTagToken
+     *             : ($type is 'Step'
+     *                 ? TStepToken
+     *                 : ($type is TGeneralKeywordsType
+     *                     ? TKeywordToken
+     *                     : TToken)))
+     * )
      *
      * @throws ParserException
      */
     protected function expectTokenType($type)
     {
         $types = (array) $type;
-        if (in_array($this->predictTokenType(), $types)) {
+        if (in_array($this->predictTokenType(), $types, true)) {
             return $this->lexer->getAdvancedToken();
         }
 
@@ -155,7 +179,7 @@ class Parser
      *
      * @param string $type Token type
      *
-     * @return array|null
+     * @phpstan-return TToken|null
      */
     protected function acceptTokenType($type)
     {
@@ -224,7 +248,7 @@ class Parser
     {
         $token = $this->expectTokenType('Feature');
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $description = null;
         $tags = $this->popTags();
         $background = null;
@@ -297,7 +321,7 @@ class Parser
     {
         $token = $this->expectTokenType('Background');
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $keyword = $token['keyword'];
         $line = $token['line'];
 
@@ -347,7 +371,7 @@ class Parser
     {
         $token = $this->expectTokenType('Scenario');
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $tags = $this->popTags();
         $keyword = $token['keyword'];
         $line = $token['line'];
@@ -393,7 +417,7 @@ class Parser
     {
         $token = $this->expectTokenType('Outline');
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $tags = $this->popTags();
         $keyword = $token['keyword'];
 
@@ -459,11 +483,6 @@ class Parser
     {
         $token = $this->expectTokenType('Step');
 
-        $keyword = $token['value'];
-        $keywordType = $token['keyword_type'];
-        $text = trim($token['text']);
-        $line = $token['line'];
-
         $this->passedNodesStack[] = 'Step';
 
         $arguments = [];
@@ -482,7 +501,13 @@ class Parser
 
         array_pop($this->passedNodesStack);
 
-        return new StepNode($keyword, $text, $arguments, $line, $keywordType);
+        return new StepNode(
+            keyword: (string) $token['value'],
+            text: trim($token['text']),
+            arguments: $arguments,
+            line: $token['line'],
+            keywordType: $token['keyword_type'],
+        );
     }
 
     /**
@@ -528,18 +553,14 @@ class Parser
     {
         $token = $this->expectTokenType('PyStringOp');
 
-        $line = $token['line'];
-
         $strings = [];
         while ('PyStringOp' !== ($predicted = $this->predictTokenType()) && $predicted === 'Text') {
-            $token = $this->expectTokenType('Text');
-
-            $strings[] = $token['value'];
+            $strings[] = (string) $this->expectTokenType('Text')['value'];
         }
 
         $this->expectTokenType('PyStringOp');
 
-        return new PyStringNode($strings, $line);
+        return new PyStringNode($strings, $token['line']);
     }
 
     /**
@@ -588,7 +609,7 @@ class Parser
     /**
      * Returns current set of tags and clears tag buffer.
      *
-     * @return array
+     * @return list<string>
      */
     protected function popTags()
     {
@@ -601,7 +622,9 @@ class Parser
     /**
      * Checks the tags fit the required format.
      *
-     * @param string[] $tags
+     * @param array<array-key, string> $tags
+     *
+     * @return void
      */
     protected function guardTags(array $tags)
     {
@@ -624,7 +647,7 @@ class Parser
     {
         $token = $this->expectTokenType('Text');
 
-        return $token['value'];
+        return (string) $token['value'];
     }
 
     /**
@@ -651,7 +674,7 @@ class Parser
         $token = $this->expectTokenType('Language');
 
         if ($this->languageSpecifierLine === null) {
-            $this->lexer->analyse($this->input, $token['value']);
+            $this->lexer->analyse($this->input, (string) $token['value']);
             $this->languageSpecifierLine = $token['line'];
         } elseif ($token['line'] !== $this->languageSpecifierLine) {
             throw new ParserException(sprintf(
@@ -670,7 +693,7 @@ class Parser
      *
      * @return array<int, list<string>>
      */
-    private function parseTableRows()
+    private function parseTableRows(): array
     {
         $table = [];
         while (in_array($predicted = $this->predictTokenType(), ['TableRow', 'Newline', 'Comment'])) {
@@ -691,10 +714,8 @@ class Parser
      * Changes step node type for types But, And to type of previous step if it exists else sets to Given.
      *
      * @param StepNode[] $steps
-     *
-     * @return StepNode
      */
-    private function normalizeStepNodeKeywordType(StepNode $node, array $steps = [])
+    private function normalizeStepNodeKeywordType(StepNode $node, array $steps = []): StepNode
     {
         if (!in_array($node->getKeywordType(), ['And', 'But'])) {
             return $node;

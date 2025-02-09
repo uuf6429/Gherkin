@@ -20,75 +20,37 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     use TaggedNodeTrait;
 
     /**
-     * @var string
-     */
-    private $text;
-    /**
-     * @var string[]
-     */
-    private $tags;
-    /**
-     * @var StepNode[]
-     */
-    private $outlineSteps;
-    /**
-     * @var array<string, string>
-     */
-    private $tokens;
-    /**
-     * @var int
-     */
-    private $line;
-    /**
      * @var list<StepNode>|null
      */
     private $steps;
-    /**
-     * @var string
-     */
-    private $outlineTitle;
-    /**
-     * @var int|null
-     */
-    private $index;
 
     /**
      * Initializes outline.
      *
      * @param string $text The entire row as a string, e.g. "| 1 | 2 | 3 |"
-     * @param array<array-key, string> $tags
-     * @param array<array-key, StepNode> $outlineSteps
+     * @param list<string> $tags
+     * @param list<StepNode> $outlineSteps
      * @param array<string, string> $tokens
      * @param int $line line number within the feature file
      * @param string|null $outlineTitle original title of the scenario outline
      * @param int|null $index the 1-based index of the row/example within the scenario outline
      */
-    public function __construct($text, array $tags, $outlineSteps, array $tokens, $line, $outlineTitle = null, $index = null)
-    {
-        $this->text = $text;
-        $this->tags = $tags;
-        $this->outlineSteps = $outlineSteps;
-        $this->tokens = $tokens;
-        $this->line = $line;
-        $this->outlineTitle = $outlineTitle;
-        $this->index = $index;
+    public function __construct(
+        private readonly string $text,
+        private readonly array $tags,
+        private readonly array $outlineSteps,
+        private readonly array $tokens,
+        private readonly int $line,
+        private readonly ?string $outlineTitle = null,
+        private readonly ?int $index = null,
+    ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Example';
     }
 
-    /**
-     * Returns node keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->getNodeType();
@@ -119,17 +81,12 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      */
     public function hasSteps()
     {
-        return count($this->outlineSteps) > 0;
+        return $this->outlineSteps !== [];
     }
 
-    /**
-     * Returns outline steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
-        return $this->steps = $this->steps ?: $this->createExampleSteps();
+        return $this->steps ??= $this->createExampleSteps();
     }
 
     /**
@@ -142,11 +99,6 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
         return $this->tokens;
     }
 
-    /**
-     * Returns outline declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
@@ -155,7 +107,7 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     /**
      * Returns outline title.
      *
-     * @return string
+     * @return string|null
      */
     public function getOutlineTitle()
     {
@@ -164,7 +116,7 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
 
     public function getName(): ?string
     {
-        return "{$this->replaceTextTokens($this->outlineTitle)} #{$this->index}";
+        return "{$this->replaceTextTokens($this->outlineTitle ?? '')} #{$this->index}";
     }
 
     /**
@@ -229,9 +181,9 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     protected function replaceTableArgumentTokens(TableNode $argument)
     {
         $table = $argument->getTable();
-        foreach ($table as $line => $row) {
-            foreach (array_keys($row) as $col) {
-                $table[$line][$col] = $this->replaceTextTokens($table[$line][$col]);
+        foreach ($table as &$row) {
+            foreach ($row as &$cell) {
+                $cell = $this->replaceTextTokens((string) $cell);
             }
         }
 

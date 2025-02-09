@@ -20,48 +20,20 @@ class ScenarioNode implements ScenarioInterface, NamedScenarioInterface
     use TaggedNodeTrait;
 
     /**
-     * @var string
-     */
-    private $title;
-    /**
-     * @var array
-     */
-    private $tags = [];
-    /**
-     * @var StepNode[]
-     */
-    private $steps = [];
-    /**
-     * @var string
-     */
-    private $keyword;
-    /**
-     * @var int
-     */
-    private $line;
-
-    /**
      * Initializes scenario.
      *
-     * @param string|null $title
-     * @param StepNode[] $steps
-     * @param string $keyword
-     * @param int $line
+     * @param list<string> $tags
+     * @param list<StepNode> $steps
      */
-    public function __construct($title, array $tags, array $steps, $keyword, $line)
-    {
-        $this->title = $title;
-        $this->tags = $tags;
-        $this->steps = $steps;
-        $this->keyword = $keyword;
-        $this->line = $line;
+    public function __construct(
+        private readonly ?string $title,
+        private readonly array $tags,
+        private readonly array $steps,
+        private readonly string $keyword,
+        private readonly int $line,
+    ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Scenario';
@@ -90,41 +62,21 @@ class ScenarioNode implements ScenarioInterface, NamedScenarioInterface
         return $this->tags;
     }
 
-    /**
-     * Checks if scenario has steps.
-     *
-     * @return bool
-     */
     public function hasSteps()
     {
-        return count($this->steps) > 0;
+        return $this->steps !== [];
     }
 
-    /**
-     * Returns scenario steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
         return $this->steps;
     }
 
-    /**
-     * Returns scenario keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
     }
 
-    /**
-     * Returns scenario declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
