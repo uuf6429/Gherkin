@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 
 class TableNodeTest extends TestCase
 {
-    public function testConstructorExpectsSameNumberOfColumnsInEachRow()
+    public function testConstructorExpectsSameNumberOfColumnsInEachRow(): void
     {
         $this->expectException(NodeException::class);
         new TableNode([
@@ -26,7 +26,7 @@ class TableNodeTest extends TestCase
         ]);
     }
 
-    public function testConstructorExpectsTwoDimensionalArray()
+    public function testConstructorExpectsTwoDimensionalArray(): void
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table row '0' is expected to be array, got string");
@@ -35,7 +35,7 @@ class TableNodeTest extends TestCase
         ]);
     }
 
-    public function testConstructorExpectsScalarCellValue()
+    public function testConstructorExpectsScalarCellValue(): void
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table cell at row '0', col '0' is expected to be scalar, got array");
@@ -44,7 +44,7 @@ class TableNodeTest extends TestCase
         ]);
     }
 
-    public function testConstructorExpectsEqualRowLengths()
+    public function testConstructorExpectsEqualRowLengths(): void
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table row '1' is expected to have 2 columns, got 1");
@@ -54,7 +54,7 @@ class TableNodeTest extends TestCase
         ]);
     }
 
-    public function testHashTable()
+    public function testHashTable(): void
     {
         $table = new TableNode([
             ['username', 'password'],
@@ -86,7 +86,7 @@ class TableNodeTest extends TestCase
         );
     }
 
-    public function testIterator()
+    public function testIterator(): void
     {
         $table = new TableNode([
             ['username', 'password'],
@@ -105,7 +105,7 @@ class TableNodeTest extends TestCase
         );
     }
 
-    public function testRowsHashTable()
+    public function testRowsHashTable(): void
     {
         $table = new TableNode([
             ['username', 'everzet'],
@@ -119,7 +119,7 @@ class TableNodeTest extends TestCase
         );
     }
 
-    public function testLongRowsHashTable()
+    public function testLongRowsHashTable(): void
     {
         $table = new TableNode([
             ['username', 'everzet', 'marcello'],
@@ -134,7 +134,7 @@ class TableNodeTest extends TestCase
         ], $table->getRowsHash());
     }
 
-    public function testGetRows()
+    public function testGetRows(): void
     {
         $table = new TableNode([
             ['username', 'password'],
@@ -149,7 +149,7 @@ class TableNodeTest extends TestCase
         ], $table->getRows());
     }
 
-    public function testGetLines()
+    public function testGetLines(): void
     {
         $table = new TableNode([
             5 => ['username', 'password'],
@@ -160,7 +160,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals([5, 10, 13], $table->getLines());
     }
 
-    public function testGetRow()
+    public function testGetRow(): void
     {
         $table = new TableNode([
             ['username', 'password'],
@@ -172,7 +172,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals(['antono', 'pa$sword'], $table->getRow(2));
     }
 
-    public function testGetColumn()
+    public function testGetColumn(): void
     {
         $table = new TableNode([
             ['username', 'password'],
@@ -192,7 +192,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals(['username', 'everzet', 'antono'], $table->getColumn(0));
     }
 
-    public function testGetRowWithLineNumbers()
+    public function testGetRowWithLineNumbers(): void
     {
         $table = new TableNode([
             5 => ['username', 'password'],
@@ -204,7 +204,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals(['antono', 'pa$sword'], $table->getRow(2));
     }
 
-    public function testGetTable()
+    public function testGetTable(): void
     {
         $table = new TableNode($a = [
             5 => ['username', 'password'],
@@ -215,7 +215,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals($a, $table->getTable());
     }
 
-    public function testGetRowLine()
+    public function testGetRowLine(): void
     {
         $table = new TableNode([
             5 => ['username', 'password'],
@@ -227,7 +227,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals(13, $table->getRowLine(2));
     }
 
-    public function testGetRowAsString()
+    public function testGetRowAsString(): void
     {
         $table = new TableNode([
             5 => ['username', 'password'],
@@ -239,7 +239,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals('| antono   | pa$sword |', $table->getRowAsString(2));
     }
 
-    public function testGetTableAsString()
+    public function testGetTableAsString(): void
     {
         $table = new TableNode([
             5 => ['id', 'username', 'password'],
@@ -255,7 +255,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals($expected, $table->getTableAsString());
     }
 
-    public function testFromList()
+    public function testFromList(): void
     {
         $table = TableNode::fromList([
             'everzet',
@@ -269,7 +269,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals($expected, $table);
     }
 
-    public function testMergeRowsFromTablePassSeveralTablesShouldBeMerged()
+    public function testMergeRowsFromTablePassSeveralTablesShouldBeMerged(): void
     {
         $table = new TableNode([
             5 => ['id', 'username', 'password'],
@@ -298,7 +298,7 @@ class TableNodeTest extends TestCase
         $this->assertEquals(['32', '3antono', '3pa$sword'], $table->getRow(6));
     }
 
-    public function testMergeRowsFromTableWrongHeaderNameExceptionThrown()
+    public function testMergeRowsFromTableWrongHeaderNameExceptionThrown(): void
     {
         $this->expectException(NodeException::class);
         $table = new TableNode([
@@ -315,7 +315,7 @@ class TableNodeTest extends TestCase
         $table->mergeRowsFromTable($new);
     }
 
-    public function testGetTableFromListWithMultidimensionalArrayArgument()
+    public function testGetTableFromListWithMultidimensionalArrayArgument(): void
     {
         $this->expectException(NodeException::class);
         TableNode::fromList([
@@ -324,7 +324,7 @@ class TableNodeTest extends TestCase
         ]);
     }
 
-    public function testMergeRowsFromTableWrongHeaderOrderExceptionThrown()
+    public function testMergeRowsFromTableWrongHeaderOrderExceptionThrown(): void
     {
         $this->expectException(NodeException::class);
         $table = new TableNode([
@@ -341,7 +341,7 @@ class TableNodeTest extends TestCase
         $table->mergeRowsFromTable($new);
     }
 
-    public function testMergeRowsFromTableWrongHeaderSizeExceptionThrown()
+    public function testMergeRowsFromTableWrongHeaderSizeExceptionThrown(): void
     {
         $this->expectException(NodeException::class);
         $table = new TableNode([

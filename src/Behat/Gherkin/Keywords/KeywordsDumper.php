@@ -69,7 +69,7 @@ class KeywordsDumper
      * @param bool $short Dump short version
      * @param bool $excludeAsterisk
      *
-     * @return string|array String for short version and array of features for extended
+     * @return ($short is true ? string : list<string>) String for short version and array of features for extended
      */
     public function dump($language, $short = true, $excludeAsterisk = false)
     {
