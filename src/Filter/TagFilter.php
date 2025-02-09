@@ -23,6 +23,9 @@ use function strlen;
  */
 class TagFilter extends ComplexFilter
 {
+    /**
+     * @var string
+     */
     protected $filterString;
 
     /**

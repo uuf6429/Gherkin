@@ -20,57 +20,29 @@ class OutlineNode implements ScenarioInterface
     use TaggedNodeTrait;
 
     /**
-     * @var string
-     */
-    private $title;
-    /**
-     * @var string[]
-     */
-    private $tags;
-    /**
-     * @var StepNode[]
-     */
-    private $steps;
-    /**
      * @var array<array-key, ExampleTableNode>
      */
-    private $tables;
+    private readonly array $tables;
     /**
-     * @var string
+     * @var ExampleNode[]
      */
-    private $keyword;
-    /**
-     * @var int
-     */
-    private $line;
-    /**
-     * @var ExampleNode[]|null
-     */
-    private $examples;
+    private array $examples;
 
     /**
      * Initializes outline.
      *
-     * @param string|null $title
      * @param string[] $tags
      * @param StepNode[] $steps
      * @param ExampleTableNode|array<array-key, ExampleTableNode> $tables
-     * @param string $keyword
-     * @param int $line
      */
     public function __construct(
-        $title,
-        array $tags,
-        array $steps,
-        $tables,
-        $keyword,
-        $line,
+        private readonly ?string $title,
+        private readonly array $tags,
+        private readonly array $steps,
+        ExampleTableNode|array $tables,
+        private readonly string $keyword,
+        private readonly int $line,
     ) {
-        $this->title = $title;
-        $this->tags = $tags;
-        $this->steps = $steps;
-        $this->keyword = $keyword;
-        $this->line = $line;
         $this->tables = is_array($tables) ? $tables : [$tables];
     }
 
@@ -134,9 +106,9 @@ class OutlineNode implements ScenarioInterface
      *
      * WARNING: it returns a merged table with tags lost.
      *
-     * @deprecated use getExampleTables instead
-     *
      * @return ExampleTableNode
+     *
+     * @deprecated use getExampleTables instead
      */
     public function getExampleTable()
     {
@@ -162,7 +134,7 @@ class OutlineNode implements ScenarioInterface
      */
     public function getExamples()
     {
-        return $this->examples = $this->examples ?: $this->createExamples();
+        return $this->examples ??= $this->createExamples();
     }
 
     /**

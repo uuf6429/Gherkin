@@ -20,37 +20,9 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     use TaggedNodeTrait;
 
     /**
-     * @var string
-     */
-    private $text;
-    /**
-     * @var string[]
-     */
-    private $tags;
-    /**
-     * @var StepNode[]
-     */
-    private $outlineSteps;
-    /**
-     * @var array<string, string>
-     */
-    private $tokens;
-    /**
-     * @var int
-     */
-    private $line;
-    /**
      * @var list<StepNode>|null
      */
     private $steps;
-    /**
-     * @var string
-     */
-    private $outlineTitle;
-    /**
-     * @var int|null
-     */
-    private $index;
 
     /**
      * Initializes outline.
@@ -63,15 +35,15 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      * @param string|null $outlineTitle original title of the scenario outline
      * @param int|null $index the 1-based index of the row/example within the scenario outline
      */
-    public function __construct($text, array $tags, $outlineSteps, array $tokens, $line, $outlineTitle = null, $index = null)
-    {
-        $this->text = $text;
-        $this->tags = $tags;
-        $this->outlineSteps = $outlineSteps;
-        $this->tokens = $tokens;
-        $this->line = $line;
-        $this->outlineTitle = $outlineTitle;
-        $this->index = $index;
+    public function __construct(
+        private readonly string $text,
+        private readonly array $tags,
+        private readonly array $outlineSteps,
+        private readonly array $tokens,
+        private readonly int $line,
+        private readonly ?string $outlineTitle = null,
+        private readonly ?int $index = null,
+    ) {
     }
 
     /**
@@ -155,7 +127,7 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     /**
      * Returns outline title.
      *
-     * @return string
+     * @return string|null
      */
     public function getOutlineTitle()
     {
@@ -164,7 +136,7 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
 
     public function getName(): ?string
     {
-        return "{$this->replaceTextTokens($this->outlineTitle)} #{$this->index}";
+        return "{$this->replaceTextTokens($this->outlineTitle ?? '')} #{$this->index}";
     }
 
     /**
