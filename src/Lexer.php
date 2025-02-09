@@ -20,24 +20,26 @@ use Behat\Gherkin\Keywords\KeywordsInterface;
  */
 class Lexer
 {
-    private $language;
-    private $lines;
-    private $linesCount;
+    private string $language;
+    /**
+     * @var list<string>
+     */
+    private array $lines;
+    private int $linesCount;
     private $line;
-    private $trimmedLine;
-    private $lineNumber;
+    private ?string $trimmedLine;
+    private int $lineNumber;
     private $eos;
-    private $keywords;
     private $keywordsCache = [];
     private $stepKeywordTypesCache = [];
     private $deferredObjects = [];
-    private $deferredObjectsCount = 0;
+    private int $deferredObjectsCount = 0;
     private $stashedToken;
-    private $inPyString = false;
-    private $pyStringSwallow = 0;
-    private $featureStarted = false;
-    private $allowMultilineArguments = false;
-    private $allowSteps = false;
+    private bool $inPyString = false;
+    private int $pyStringSwallow = 0;
+    private bool $featureStarted = false;
+    private bool $allowMultilineArguments = false;
+    private bool $allowSteps = false;
     private $pyStringDelimiter;
 
     /**
@@ -45,9 +47,9 @@ class Lexer
      *
      * @param KeywordsInterface $keywords Keywords holder
      */
-    public function __construct(KeywordsInterface $keywords)
-    {
-        $this->keywords = $keywords;
+    public function __construct(
+        private readonly KeywordsInterface $keywords,
+    ) {
     }
 
     /**

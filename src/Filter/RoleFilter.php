@@ -20,6 +20,9 @@ use Behat\Gherkin\Node\ScenarioInterface;
  */
 class RoleFilter extends SimpleFilter
 {
+    /**
+     * @var string
+     */
     protected $pattern;
 
     /**

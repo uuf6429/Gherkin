@@ -36,13 +36,23 @@ use Behat\Gherkin\Node\TableNode;
  */
 class Parser
 {
-    private $lexer;
-    private $input;
-    private $file;
-    private $tags = [];
+    private Lexer $lexer;
+    private string $input;
+    private ?string $file;
+    /**
+     * @var list<string>
+     */
+    private array $tags = [];
+    /**
+     * @fixme It's not clear what sort of values are actually expected here.
+     *
+     * @var mixed|null
+     */
     private $languageSpecifierLine;
-
-    private $passedNodesStack = [];
+    /**
+     * @var list<'Feature'|'Scenario'|'Outline'|'Step'>
+     */
+    private array $passedNodesStack = [];
 
     /**
      * Initializes parser.
@@ -112,7 +122,7 @@ class Parser
             if (!$node instanceof FeatureNode) {
                 throw new ParserException(sprintf(
                     'Expected Feature, but got %s on line: %d%s',
-                    $node->getKeyword(),
+                    method_exists($node, 'getKeyword') ? $node->getKeyword() : null,
                     $node->getLine(),
                     $this->file ? ' in file: ' . $this->file : ''
                 ));
@@ -134,7 +144,7 @@ class Parser
     protected function expectTokenType($type)
     {
         $types = (array) $type;
-        if (in_array($this->predictTokenType(), $types)) {
+        if (in_array($this->predictTokenType(), $types, true)) {
             return $this->lexer->getAdvancedToken();
         }
 

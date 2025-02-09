@@ -14,12 +14,15 @@ use Behat\Gherkin\Keywords\ArrayKeywords;
 use Behat\Gherkin\Lexer;
 use Behat\Gherkin\Loader\YamlFileLoader;
 use Behat\Gherkin\Node\FeatureNode;
+use Behat\Gherkin\Node\ScenarioNode;
 use Behat\Gherkin\Parser;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
 {
+    use FileReaderTrait;
+
     private Parser $gherkin;
     private YamlFileLoader $yaml;
 
@@ -28,7 +31,7 @@ class ParserTest extends TestCase
      */
     public static function parserTestDataProvider(): iterable
     {
-        foreach (glob(__DIR__ . '/Fixtures/etalons/*.yml') as $file) {
+        foreach (glob(__DIR__ . '/Fixtures/etalons/*.yml') ?: [] as $file) {
             $testname = basename($file, '.yml');
             yield $testname => ['fixtureName' => $testname];
         }
@@ -47,39 +50,45 @@ class ParserTest extends TestCase
     {
         $parser = $this->getGherkinParser();
 
-        $parser->parse(<<<'FEATURE'
-        Feature:
-        Scenario:
-        Given step
-        @skipped
-        FEATURE
+        $parser->parse(
+            <<<'FEATURE'
+            Feature:
+            Scenario:
+            Given step
+            @skipped
+            FEATURE
         );
-        $feature2 = $parser->parse(<<<'FEATURE'
-        Feature:
-        Scenario:
-        Given step
-        FEATURE
+        $feature2 = $parser->parse(
+            <<<'FEATURE'
+            Feature:
+            Scenario:
+            Given step
+            FEATURE
         );
 
+        $this->assertInstanceOf(FeatureNode::class, $feature2);
         $this->assertFalse($feature2->hasTags());
     }
 
     public function testSingleCharacterStepSupport(): void
     {
-        $feature = $this->getGherkinParser()->parse(<<<'FEATURE'
-        Feature:
-        Scenario:
-        When x
-        FEATURE
+        $feature = $this->getGherkinParser()->parse(
+            <<<'FEATURE'
+            Feature:
+            Scenario:
+            When x
+            FEATURE
         );
 
+        $this->assertInstanceOf(FeatureNode::class, $feature);
         $scenarios = $feature->getScenarios();
         $scenario = array_shift($scenarios);
 
+        $this->assertInstanceOf(ScenarioNode::class, $scenario);
         $this->assertCount(1, $scenario->getSteps());
     }
 
-    protected function getGherkinParser()
+    protected function getGherkinParser(): Parser
     {
         return $this->gherkin ??= new Parser(
             new Lexer(
@@ -132,12 +141,12 @@ class ParserTest extends TestCase
 
     protected function parseFixture(string $fixture): ?FeatureNode
     {
-        $file = __DIR__ . '/Fixtures/features/' . $fixture;
+        $file = __DIR__ . "/Fixtures/features/$fixture";
 
-        return $this->getGherkinParser()->parse(file_get_contents($file), $file);
+        return $this->getGherkinParser()->parse(self::readFile($file), $file);
     }
 
-    protected function parseEtalon($etalon): FeatureNode
+    protected function parseEtalon(string $etalon): FeatureNode
     {
         $features = $this->getYamlParser()->load(__DIR__ . '/Fixtures/etalons/' . $etalon);
         $feature = $features[0];
