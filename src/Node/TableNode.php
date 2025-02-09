@@ -20,9 +20,19 @@ use ReturnTypeWillChange;
  * Represents Gherkin Table argument.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @phpstan-type TCell scalar
+ * @phpstan-type TRowLine int
+ * @phpstan-type TRow list<TCell>
+ * @phpstan-type TTable array<TRowLine, TRow>
+ *
+ * @phpstan-implements IteratorAggregate<array<string, TRow>>
  */
 class TableNode implements ArgumentInterface, IteratorAggregate
 {
+    /**
+     * @phpstan-var TTable
+     */
     private array $table;
 
     /**
@@ -33,20 +43,20 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Initializes table.
      *
-     * @param array $table Table in form of [$rowLineNumber => [$val1, $val2, $val3]]
+     * @phpstan-param TTable $table Table in form of [$rowLineNumber => [$val1, $val2, $val3]]
      *
      * @throws NodeException If the given table is invalid
      */
     public function __construct(array $table)
     {
-        $this->table = $table;
         $columnCount = null;
 
-        foreach ($this->getRows() as $ridx => $row) {
+        foreach ($table as $rowLine => $row) {
+            // @phpstan-ignore function.alreadyNarrowedType
             if (!is_array($row)) {
                 throw new NodeException(sprintf(
                     "Table row '%s' is expected to be array, got %s",
-                    $ridx,
+                    $rowLine,
                     gettype($row)
                 ));
             }
@@ -58,7 +68,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
             if (count($row) !== $columnCount) {
                 throw new NodeException(sprintf(
                     "Table row '%s' is expected to have %s columns, got %s",
-                    $ridx,
+                    $rowLine,
                     $columnCount,
                     count($row)
                 ));
@@ -69,18 +79,24 @@ class TableNode implements ArgumentInterface, IteratorAggregate
                     $this->maxLineLength[$column] = 0;
                 }
 
+                // @phpstan-ignore function.alreadyNarrowedType
                 if (!is_scalar($string)) {
                     throw new NodeException(sprintf(
                         "Table cell at row '%s', col '%s' is expected to be scalar, got %s",
-                        $ridx,
+                        $rowLine,
                         $column,
                         gettype($string)
                     ));
                 }
 
-                $this->maxLineLength[$column] = max($this->maxLineLength[$column], mb_strlen($string, 'utf8'));
+                $this->maxLineLength[$column] = max(
+                    $this->maxLineLength[$column],
+                    mb_strlen((string) $string, 'utf8')
+                );
             }
         }
+
+        $this->table = $table;
     }
 
     /**
@@ -118,7 +134,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by columns (ColumnsHash).
      *
-     * @return array
+     * @phpstan-return list<array<string, TRow>>
      */
     public function getHash()
     {
@@ -128,7 +144,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by columns.
      *
-     * @return array
+     * @phpstan-return list<array<string, TRow>>
      */
     public function getColumnsHash()
     {
@@ -173,7 +189,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table rows.
      *
-     * @return array
+     * @phpstan-return list<TRow>
      */
     public function getRows()
     {
@@ -183,7 +199,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table definition lines.
      *
-     * @return array
+     * @phpstan-return list<TRowLine>
      */
     public function getLines()
     {
@@ -331,7 +347,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Retrieves a hash iterator.
      *
-     * @return Iterator
+     * @phpstan-return Iterator<array<string, TRow>>
      */
     #[ReturnTypeWillChange]
     public function getIterator()

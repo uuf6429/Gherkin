@@ -21,14 +21,20 @@ use Behat\Gherkin\Parser;
  */
 class GherkinFileLoader extends AbstractFileLoader
 {
+    /**
+     * @var Parser
+     */
     protected $parser;
+    /**
+     * @var CacheInterface|null
+     */
     protected $cache;
 
     /**
      * Initializes loader.
      *
      * @param Parser $parser Parser
-     * @param CacheInterface $cache Cache layer
+     * @param CacheInterface|null $cache Cache layer
      */
     public function __construct(Parser $parser, ?CacheInterface $cache = null)
     {
@@ -40,6 +46,8 @@ class GherkinFileLoader extends AbstractFileLoader
      * Sets cache layer.
      *
      * @param CacheInterface $cache Cache layer
+     *
+     * @return void
      */
     public function setCache(CacheInterface $cache)
     {
@@ -72,7 +80,7 @@ class GherkinFileLoader extends AbstractFileLoader
     {
         $path = $this->getAbsolutePath($resource);
         if ($this->cache) {
-            if ($this->cache->isFresh($path, filemtime($path))) {
+            if ($this->cache->isFresh($path, filemtime($path) ?: 0)) {
                 $feature = $this->cache->read($path);
             } elseif (null !== $feature = $this->parseFeature($path)) {
                 $this->cache->write($path, $feature);
@@ -89,11 +97,14 @@ class GherkinFileLoader extends AbstractFileLoader
      *
      * @param string $path Feature path
      *
-     * @return FeatureNode
+     * @return FeatureNode|null
      */
     protected function parseFeature($path)
     {
         $content = file_get_contents($path);
+        if ($content === false) {
+            throw new \RuntimeException("File cannot be read: $path");
+        }
 
         return $this->parser->parse($content, $path);
     }

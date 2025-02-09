@@ -38,6 +38,9 @@ class CucumberKeywords extends ArrayKeywords
 
             $file = $yaml;
             $yaml = file_get_contents($file);
+            if ($yaml === false) {
+                throw new ParseException(sprintf('Unable to parse "%s", error while reading file.', $file));
+            }
         }
 
         try {
