@@ -18,13 +18,17 @@ namespace Behat\Gherkin\Keywords;
  * @phpstan-type TLanguage string
  * @phpstan-type TKeywordsArray array{feature: string, background: string, scenario: string, scenario_outline: string, examples: string, given: string, when: string, then: string, and: string, but: string}
  * @phpstan-type TMultiLanguageKeywords array<TLanguage, TKeywordsArray>
+ * @phpstan-type TKeywordsString string
+ * @phpstan-type TStepKeywordsType 'Given'|'When'|'Then'|'And'|'But'
+ * @phpstan-type TGeneralKeywordsType 'Feature'|'Background'|'Scenario'|'Outline'|'Examples'|'Step'
+ * @phpstan-type TKeywordsType TGeneralKeywordsType|TStepKeywordsType
  */
 interface KeywordsInterface
 {
     /**
      * Sets keywords holder language.
      *
-     * @param string $language Language name
+     * @param TLanguage $language Language name
      *
      * @return void
      */
@@ -33,77 +37,77 @@ interface KeywordsInterface
     /**
      * Returns Feature keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getFeatureKeywords();
 
     /**
      * Returns Background keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getBackgroundKeywords();
 
     /**
      * Returns Scenario keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getScenarioKeywords();
 
     /**
      * Returns Scenario Outline keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getOutlineKeywords();
 
     /**
      * Returns Examples keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getExamplesKeywords();
 
     /**
      * Returns Given keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getGivenKeywords();
 
     /**
      * Returns When keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getWhenKeywords();
 
     /**
      * Returns Then keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getThenKeywords();
 
     /**
      * Returns And keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getAndKeywords();
 
     /**
      * Returns But keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getButKeywords();
 
     /**
      * Returns all step keywords (separated by "|").
      *
-     * @return string
+     * @phpstan-return TKeywordsString
      */
     public function getStepKeywords();
 }

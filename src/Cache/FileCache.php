@@ -29,7 +29,8 @@ class FileCache implements CacheInterface
      */
     private static function getGherkinVersionHash(): string
     {
-        $version = InstalledVersions::getVersion('behat/gherkin');
+        $version = InstalledVersions::getVersion('behat/gherkin')
+            ?? throw new \RuntimeException('Cannot detect behat/gherkin package version');
 
         // Composer version strings can contain arbitrary content so hash for filesystem safety
         return md5($version);
@@ -50,19 +51,11 @@ class FileCache implements CacheInterface
             @mkdir($this->path, 0777, true);
         }
 
-        if (!is_writeable($this->path)) {
+        if (!is_writable($this->path)) {
             throw new CacheException(sprintf('Cache path "%s" is not writeable. Check your filesystem permissions or disable Gherkin file cache.', $this->path));
         }
     }
 
-    /**
-     * Checks that cache for feature exists and is fresh.
-     *
-     * @param string $path Feature path
-     * @param int $timestamp The last time feature was updated
-     *
-     * @return bool
-     */
     public function isFresh($path, $timestamp)
     {
         $cachePath = $this->getCachePathFor($path);
@@ -74,20 +67,15 @@ class FileCache implements CacheInterface
         return filemtime($cachePath) > $timestamp;
     }
 
-    /**
-     * Reads feature cache from path.
-     *
-     * @param string $path Feature path
-     *
-     * @return FeatureNode
-     *
-     * @throws CacheException
-     */
     public function read($path)
     {
         $cachePath = $this->getCachePathFor($path);
-        $feature = unserialize(file_get_contents($cachePath));
+        $fileData = file_get_contents($cachePath);
+        if ($fileData === false) {
+            throw new CacheException(sprintf('Can not read cache for a feature "%s" from "%s".', $path, $cachePath));
+        }
 
+        $feature = unserialize($fileData);
         if (!$feature instanceof FeatureNode) {
             throw new CacheException(sprintf('Can not load cache for a feature "%s" from "%s".', $path, $cachePath));
         }
@@ -95,14 +83,6 @@ class FileCache implements CacheInterface
         return $feature;
     }
 
-    /**
-     * Caches feature node.
-     *
-     * @param string $path Feature path
-     * @param FeatureNode $feature Feature instance
-     *
-     * @return void
-     */
     public function write($path, FeatureNode $feature)
     {
         file_put_contents($this->getCachePathFor($path), serialize($feature));

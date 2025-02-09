@@ -22,7 +22,7 @@ class OutlineNode implements ScenarioInterface
     /**
      * @var array<array-key, ExampleTableNode>
      */
-    private array $tables;
+    private readonly array $tables;
     /**
      * @var ExampleNode[]
      */
@@ -30,35 +30,25 @@ class OutlineNode implements ScenarioInterface
 
     /**
      * @param list<string> $tags
-     * @param StepNode[] $steps
+     * @param list<StepNode> $steps
      * @param ExampleTableNode|array<array-key, ExampleTableNode> $tables
      */
     public function __construct(
         private readonly ?string $title,
         private readonly array $tags,
         private readonly array $steps,
-        array|ExampleTableNode $tables,
+        ExampleTableNode|array $tables,
         private readonly string $keyword,
         private readonly int $line,
     ) {
         $this->tables = is_array($tables) ? $tables : [$tables];
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Outline';
     }
 
-    /**
-     * Returns outline title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
@@ -69,21 +59,11 @@ class OutlineNode implements ScenarioInterface
         return $this->tags;
     }
 
-    /**
-     * Checks if outline has steps.
-     *
-     * @return bool
-     */
     public function hasSteps()
     {
-        return count($this->steps) > 0;
+        return $this->steps !== [];
     }
 
-    /**
-     * Returns outline steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
         return $this->steps;
@@ -145,21 +125,11 @@ class OutlineNode implements ScenarioInterface
         return $this->tables;
     }
 
-    /**
-     * Returns outline keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
     }
 
-    /**
-     * Returns outline declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
@@ -182,6 +152,18 @@ class OutlineNode implements ScenarioInterface
         );
     }
 
+    public function withSteps(array $steps)
+    {
+        return new OutlineNode(
+            $this->title,
+            $this->tags,
+            $steps,
+            $this->tables,
+            $this->keyword,
+            $this->line,
+        );
+    }
+
     /**
      * Creates examples for this outline using examples table.
      *
@@ -197,7 +179,7 @@ class OutlineNode implements ScenarioInterface
                     $exampleTable->getRowAsString($rowNum + 1),
                     array_merge($this->tags, $exampleTable->getTags()),
                     $this->getSteps(),
-                    $row,
+                    array_map(strval(...), $row),
                     $exampleTable->getRowLine($rowNum + 1),
                     $this->getTitle(),
                     $rowNum + 1

@@ -18,7 +18,7 @@ namespace Behat\Gherkin\Node;
 class BackgroundNode implements ScenarioLikeInterface
 {
     /**
-     * @param StepNode[] $steps
+     * @param list<StepNode> $steps
      */
     public function __construct(
         private readonly ?string $title,
@@ -28,61 +28,31 @@ class BackgroundNode implements ScenarioLikeInterface
     ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Background';
     }
 
-    /**
-     * Returns background title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
     }
 
-    /**
-     * Checks if background has steps.
-     *
-     * @return bool
-     */
     public function hasSteps()
     {
-        return (bool) count($this->steps);
+        return $this->steps !== [];
     }
 
-    /**
-     * Returns background steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
         return $this->steps;
     }
 
-    /**
-     * Returns background keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
     }
 
-    /**
-     * Returns background declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

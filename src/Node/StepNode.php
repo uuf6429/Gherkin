@@ -43,11 +43,6 @@ class StepNode implements NodeInterface
         $this->keywordType = $keywordType ?: 'Given';
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Step';
@@ -102,7 +97,7 @@ class StepNode implements NodeInterface
      */
     public function hasArguments()
     {
-        return (bool) count($this->arguments);
+        return $this->arguments !== [];
     }
 
     /**

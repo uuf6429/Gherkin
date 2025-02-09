@@ -25,18 +25,10 @@ class MemoryCache implements CacheInterface
      */
     private array $features = [];
     /**
-     * @var array<string, int>
+     * @var array<string, positive-int>
      */
     private array $timestamps = [];
 
-    /**
-     * Checks that cache for feature exists and is fresh.
-     *
-     * @param string $path Feature path
-     * @param int $timestamp The last time feature was updated
-     *
-     * @return bool
-     */
     public function isFresh($path, $timestamp)
     {
         if (!isset($this->features[$path])) {
@@ -46,26 +38,11 @@ class MemoryCache implements CacheInterface
         return $this->timestamps[$path] > $timestamp;
     }
 
-    /**
-     * Reads feature cache from path.
-     *
-     * @param string $path Feature path
-     *
-     * @return FeatureNode
-     */
     public function read($path)
     {
         return $this->features[$path];
     }
 
-    /**
-     * Caches feature node.
-     *
-     * @param string $path Feature path
-     * @param FeatureNode $feature Feature instance
-     *
-     * @return void
-     */
     public function write($path, FeatureNode $feature)
     {
         $this->features[$path] = $feature;

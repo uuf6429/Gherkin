@@ -23,6 +23,57 @@ use Behat\Gherkin\Node\TableNode;
  * From-array loader.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * @phpstan-type TArrayResource array{features: array<TLine, TFeatureHash>}|array{feature?: TFeatureHash}
+ * @phpstan-type TLine int
+ * @phpstan-type TFeatureHash array{
+ *     title?: string|null,
+ *     description?: string|null,
+ *     tags?: list<string>,
+ *     keyword?: string,
+ *     language?: string,
+ *     line?: int,
+ *     scenarios?: array<TLine, TOutlineHash|TScenarioHash>,
+ *     background?: TBackgroundHash|null,
+ * }
+ * @phpstan-type TScenarioHash array{
+ *     type?: string,
+ *     title?: string|null,
+ *     tags?: list<string>,
+ *     keyword?: string,
+ *     line?: int,
+ *     steps?: array<TLine, TStepHash>,
+ * }
+ * @phpstan-type TOutlineHash array{
+ *     type: 'outline',
+ *     title?: string|null,
+ *     tags?: list<string>,
+ *     keyword?: string,
+ *     line?: int,
+ *     steps?: array<TLine, TStepHash>,
+ *     examples?: array<array-key, TExampleHash>,
+ * }
+ * @phpstan-type TBackgroundHash array{
+ *     title?: string|null,
+ *     keyword?: string,
+ *     line?: int,
+ *     steps?: array<TLine, TStepHash>,
+ * }
+ * @phpstan-type TStepHash array{
+ *     keyword_type?: string,
+ *     type?: string,
+ *     text?: string|null,
+ *     keyword?: string,
+ *     line?: int,
+ *     arguments?: array<array-key, TArgumentHash>,
+ * }
+ * @phpstan-type TExampleHash array{table: TTable, tags?: list<string>}
+ * @phpstan-type TExampleHashOrTable TExampleHash|TTable
+ * @phpstan-type TArgumentHash TTableArgumentHash|TPyStringArgumentHash
+ * @phpstan-type TTableArgumentHash array{type: 'table', rows: TTable}
+ * @phpstan-type TPyStringArgumentHash array{type: 'pystring', line?: int|null, text: string}
+ *
+ * @phpstan-import-type TTable from ExampleTableNode
  */
 class ArrayLoader implements LoaderInterface
 {
@@ -41,7 +92,7 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads features from provided resource.
      *
-     * @param mixed $resource Resource to load
+     * @phpstan-param TArrayResource $resource Resource to load
      *
      * @return list<FeatureNode>
      */
@@ -50,8 +101,8 @@ class ArrayLoader implements LoaderInterface
         $features = [];
 
         if (isset($resource['features'])) {
-            foreach ($resource['features'] as $iterator => $hash) {
-                $feature = $this->loadFeatureHash($hash, $iterator);
+            foreach ($resource['features'] as $index => $hash) {
+                $feature = $this->loadFeatureHash($hash, $index);
                 $features[] = $feature;
             }
         } elseif (isset($resource['feature'])) {
@@ -65,8 +116,8 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads feature from provided feature hash.
      *
-     * @param array $hash Feature hash
-     * @param int $line
+     * @phpstan-param TFeatureHash $hash Feature hash
+     * @phpstan-param TLine $line
      *
      * @return FeatureNode
      */
@@ -87,11 +138,11 @@ class ArrayLoader implements LoaderInterface
         $background = isset($hash['background']) ? $this->loadBackgroundHash($hash['background']) : null;
 
         $scenarios = [];
-        foreach ((array) $hash['scenarios'] as $scenarioIterator => $scenarioHash) {
+        foreach ((array) $hash['scenarios'] as $scenarioIndex => $scenarioHash) {
             if (isset($scenarioHash['type']) && $scenarioHash['type'] === 'outline') {
-                $scenarios[] = $this->loadOutlineHash($scenarioHash, $scenarioIterator);
+                $scenarios[] = $this->loadOutlineHash($scenarioHash, $scenarioIndex);
             } else {
-                $scenarios[] = $this->loadScenarioHash($scenarioHash, $scenarioIterator);
+                $scenarios[] = $this->loadScenarioHash($scenarioHash, $scenarioIndex);
             }
         }
 
@@ -101,7 +152,7 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads background from provided hash.
      *
-     * @param array $hash Background hash
+     * @phpstan-param TBackgroundHash $hash Background hash
      *
      * @return BackgroundNode
      */
@@ -125,8 +176,8 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads scenario from provided scenario hash.
      *
-     * @param array $hash Scenario hash
-     * @param int $line Scenario definition line
+     * @phpstan-param TScenarioHash $hash Scenario hash
+     * @phpstan-param TLine $line Scenario definition line
      *
      * @return ScenarioNode
      */
@@ -151,8 +202,8 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads outline from provided outline hash.
      *
-     * @param array $hash Outline hash
-     * @param int $line Outline definition line
+     * @phpstan-param TOutlineHash $hash Outline hash
+     * @phpstan-param TLine $line Outline definition line
      *
      * @return OutlineNode
      */
@@ -179,6 +230,7 @@ class ArrayLoader implements LoaderInterface
             $examplesKeyword = 'Examples';
         }
 
+        assert(is_string($examplesKeyword));
         $examples = $this->loadExamplesHash($hash['examples'], $examplesKeyword);
 
         return new OutlineNode($hash['title'], $hash['tags'], $steps, $examples, $hash['keyword'], $hash['line']);
@@ -187,13 +239,15 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads steps from provided hash.
      *
+     * @phpstan-param array<TLine, TStepHash> $hash
+     *
      * @return list<StepNode>
      */
     private function loadStepsHash(array $hash)
     {
         $steps = [];
-        foreach ($hash as $stepIterator => $stepHash) {
-            $steps[] = $this->loadStepHash($stepHash, $stepIterator);
+        foreach ($hash as $stepIndex => $stepHash) {
+            $steps[] = $this->loadStepHash($stepHash, $stepIndex);
         }
 
         return $steps;
@@ -202,8 +256,8 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads step from provided hash.
      *
-     * @param array $hash Step hash
-     * @param int $line Step definition line
+     * @phpstan-param TStepHash $hash Step hash
+     * @phpstan-param TLine $line Step definition line
      *
      * @return StepNode
      */
@@ -230,13 +284,13 @@ class ArrayLoader implements LoaderInterface
             }
         }
 
-        return new StepNode($hash['type'], $hash['text'], $arguments, $hash['line'], $hash['keyword_type']);
+        return new StepNode($hash['type'], (string) $hash['text'], $arguments, $hash['line'], $hash['keyword_type']);
     }
 
     /**
      * Loads table from provided hash.
      *
-     * @param array $hash Table hash
+     * @phpstan-param TTable $hash Table hash
      *
      * @return TableNode
      */
@@ -248,8 +302,8 @@ class ArrayLoader implements LoaderInterface
     /**
      * Loads PyString from provided hash.
      *
-     * @param array $hash PyString hash
-     * @param int $line
+     * @phpstan-param TPyStringArgumentHash $hash PyString hash
+     * @phpstan-param TLine $line
      *
      * @return PyStringNode
      */
@@ -269,31 +323,60 @@ class ArrayLoader implements LoaderInterface
      * Processes cases when examples are in the form of array of arrays
      * OR in the form of array of objects.
      *
-     * @param array $examplesHash
-     * @param string $examplesKeyword
+     * @phpstan-param TExampleHashOrTable|list<TExampleHashOrTable> $examplesHash
      *
      * @return list<ExampleTableNode>
      */
-    private function loadExamplesHash($examplesHash, $examplesKeyword)
+    private function loadExamplesHash(array $examplesHash, string $examplesKeyword): array
     {
-        if (!isset($examplesHash[0])) {
-            // examples as a single table - create a list with the one element
-            return [new ExampleTableNode($examplesHash, $examplesKeyword)];
+        if ($this->isSingleTableExampleHash($examplesHash)) {
+            return [$this->loadExampleHash($examplesHash, $examplesKeyword)];
         }
 
         $examples = [];
 
         foreach ($examplesHash as $exampleHash) {
-            if (isset($exampleHash['table'])) {
-                // we have examples as objects, hence there could be tags
-                $exHashTags = $exampleHash['tags'] ?? [];
-                $examples[] = new ExampleTableNode($exampleHash['table'], $examplesKeyword, $exHashTags);
-            } else {
-                // we have examples as arrays
-                $examples[] = new ExampleTableNode($exampleHash, $examplesKeyword);
-            }
+            $examples[] = $this->loadExampleHash($exampleHash, $examplesKeyword);
         }
 
         return $examples;
+    }
+
+    /**
+     * @phpstan-param TExampleHashOrTable $hash
+     */
+    private function loadExampleHash(array $hash, string $keyword): ExampleTableNode
+    {
+        if ($this->isObjectExampleHash($hash)) {
+            // we have an example as an object; hence there could be tags
+            return new ExampleTableNode($hash['table'], $keyword, $hash['tags'] ?? []);
+        }
+
+        // example as an array
+        return new ExampleTableNode($hash, $keyword);
+    }
+
+    /**
+     * @phpstan-param TExampleHashOrTable|list<TExampleHashOrTable> $hash
+     *
+     * @phpstan-assert-if-true TExampleHashOrTable $hash
+     *
+     * @phpstan-assert-if-false list<TExampleHashOrTable> $hash
+     */
+    private function isSingleTableExampleHash(array $hash): bool
+    {
+        return !isset($hash[0]);
+    }
+
+    /**
+     * @phpstan-param TExampleHashOrTable $hash
+     *
+     * @phpstan-assert-if-true TExampleHash $hash
+     *
+     * @phpstan-assert-if-false TTable $hash
+     */
+    private function isObjectExampleHash(array $hash): bool
+    {
+        return isset($hash['table']);
     }
 }

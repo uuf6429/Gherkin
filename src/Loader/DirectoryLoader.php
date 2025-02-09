@@ -64,6 +64,9 @@ class DirectoryLoader extends AbstractFileLoader
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
         );
+        /**
+         * @var \Iterator<\SplFileInfo> $iterator
+         */
         $paths = array_map(strval(...), iterator_to_array($iterator));
         uasort($paths, strnatcasecmp(...));
 

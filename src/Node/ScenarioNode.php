@@ -20,7 +20,7 @@ class ScenarioNode implements ScenarioInterface, NamedScenarioInterface
     use TaggedNodeTrait;
 
     /**
-     * @param StepNode[] $steps
+     * @param list<StepNode> $steps
      * @param list<string> $tags
      */
     public function __construct(
@@ -32,11 +32,6 @@ class ScenarioNode implements ScenarioInterface, NamedScenarioInterface
     ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Scenario';
@@ -65,43 +60,34 @@ class ScenarioNode implements ScenarioInterface, NamedScenarioInterface
         return $this->tags;
     }
 
-    /**
-     * Checks if scenario has steps.
-     *
-     * @return bool
-     */
     public function hasSteps()
     {
-        return count($this->steps) > 0;
+        return $this->steps !== [];
     }
 
-    /**
-     * Returns scenario steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
         return $this->steps;
     }
 
-    /**
-     * Returns scenario keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
     }
 
-    /**
-     * Returns scenario declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
+    }
+
+    public function withSteps(array $steps): self
+    {
+        return new self(
+            $this->title,
+            $this->tags,
+            $steps,
+            $this->keyword,
+            $this->line,
+        );
     }
 }

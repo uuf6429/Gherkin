@@ -15,6 +15,7 @@ use Behat\Gherkin\Exception\NodeException;
 use Behat\Gherkin\Exception\ParserException;
 use Behat\Gherkin\Exception\UnexpectedParserNodeException;
 use Behat\Gherkin\Exception\UnexpectedTaggedNodeException;
+use Behat\Gherkin\Keywords\KeywordsInterface;
 use Behat\Gherkin\Node\BackgroundNode;
 use Behat\Gherkin\Node\ExampleTableNode;
 use Behat\Gherkin\Node\FeatureNode;
@@ -28,15 +29,22 @@ use Behat\Gherkin\Node\TableNode;
 /**
  * Gherkin parser.
  *
+ * ```
  * $lexer  = new Behat\Gherkin\Lexer($keywords);
  * $parser = new Behat\Gherkin\Parser($lexer);
  * $featuresArray = $parser->parse('/path/to/feature.feature');
+ * ```
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  *
  * @phpstan-type TParsedExpressionResult FeatureNode|BackgroundNode|ScenarioNode|OutlineNode|ExampleTableNode|TableNode|PyStringNode|StepNode|string
  *
  * @phpstan-import-type TToken from Lexer
+ * @phpstan-import-type TTagToken from Lexer
+ * @phpstan-import-type TStepToken from Lexer
+ * @phpstan-import-type TKeywordToken from Lexer
+ * @phpstan-import-type TTableRowToken from Lexer
+ * @phpstan-import-type TGeneralKeywordsType from KeywordsInterface
  */
 class Parser
 {
@@ -104,14 +112,24 @@ class Parser
      *
      * @return array
      *
-     * @phpstan-return TToken
+     * @phpstan-return (
+     *     $type is 'TableRow'
+     *         ? TTableRowToken
+     *         : ($type is 'Tag'
+     *             ? TTagToken
+     *             : ($type is 'Step'
+     *                 ? TStepToken
+     *                 : ($type is TGeneralKeywordsType
+     *                     ? TKeywordToken
+     *                     : TToken)))
+     * )
      *
      * @throws ParserException
      */
     protected function expectTokenType($type)
     {
         $types = (array) $type;
-        if (in_array($this->predictTokenType(), $types)) {
+        if (in_array($this->predictTokenType(), $types, true)) {
             return $this->lexer->getAdvancedToken();
         }
 
@@ -201,10 +219,8 @@ class Parser
     protected function parseFeature()
     {
         $token = $this->expectTokenType('Feature');
-        \assert(\array_key_exists('keyword', $token));
-        \assert(\array_key_exists('indent', $token));
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $description = null;
         $tags = $this->popTags();
         $background = null;
@@ -267,10 +283,8 @@ class Parser
     protected function parseBackground()
     {
         $token = $this->expectTokenType('Background');
-        \assert(\array_key_exists('keyword', $token));
-        \assert(\array_key_exists('indent', $token));
 
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $keyword = $token['keyword'];
         $line = $token['line'];
 
@@ -331,13 +345,11 @@ class Parser
     }
 
     /**
-     * @phpstan-param TToken $token
+     * @phpstan-param TKeywordToken $token
      */
     private function parseScenarioOrOutlineBody(array $token): OutlineNode|ScenarioNode
     {
-        \assert(\array_key_exists('keyword', $token));
-        \assert(\array_key_exists('indent', $token));
-        $title = trim($token['value'] ?? '');
+        $title = trim((string) ($token['value'] ?? ''));
         $tags = $this->popTags();
         $keyword = $token['keyword'];
 
@@ -447,14 +459,6 @@ class Parser
     protected function parseStep()
     {
         $token = $this->expectTokenType('Step');
-        \assert(\is_string($token['value']));
-        \assert(\array_key_exists('keyword_type', $token));
-        \assert(\array_key_exists('text', $token));
-
-        $keyword = $token['value'];
-        $keywordType = $token['keyword_type'];
-        $text = trim($token['text']);
-        $line = $token['line'];
 
         $arguments = [];
         while (in_array($predicted = $this->predictTokenType(), ['PyStringOp', 'TableRow', 'Newline', 'Comment'])) {
@@ -470,7 +474,7 @@ class Parser
             }
         }
 
-        return new StepNode($keyword, $text, $arguments, $line, $keywordType);
+        return new StepNode((string) $token['value'], trim($token['text']), $arguments, $token['line'], $token['keyword_type']);
     }
 
     /**
@@ -481,7 +485,6 @@ class Parser
     protected function parseExamples()
     {
         $token = $this->expectTokenType('Examples');
-        \assert(\array_key_exists('keyword', $token));
         $keyword = $token['keyword'];
         $tags = empty($this->tags) ? [] : $this->popTags();
         $table = $this->parseTableRows();
@@ -518,8 +521,6 @@ class Parser
     {
         $token = $this->expectTokenType('PyStringOp');
 
-        $line = $token['line'];
-
         $strings = [];
         while ('PyStringOp' !== ($predicted = $this->predictTokenType()) && $predicted === 'Text') {
             $token = $this->expectTokenType('Text');
@@ -530,7 +531,7 @@ class Parser
 
         $this->expectTokenType('PyStringOp');
 
-        return new PyStringNode($strings, $line);
+        return new PyStringNode($strings, $token['line']);
     }
 
     /**
@@ -541,7 +542,6 @@ class Parser
     protected function parseTags()
     {
         $token = $this->expectTokenType('Tag');
-        \assert(\array_key_exists('tags', $token));
 
         // Validate that the tags are followed by a node that can be tagged
         $this->validateAndGetNextTaggedNodeType();
@@ -569,7 +569,7 @@ class Parser
     /**
      * Checks the tags fit the required format.
      *
-     * @param string[] $tags
+     * @param array<array-key, string> $tags
      *
      * @return void
      */
@@ -631,7 +631,7 @@ class Parser
      *
      * @return array<int, list<string>>
      */
-    private function parseTableRows()
+    private function parseTableRows(): array
     {
         $table = [];
         while (in_array($predicted = $this->predictTokenType(), ['TableRow', 'Newline', 'Comment'])) {
@@ -641,7 +641,6 @@ class Parser
             }
 
             $token = $this->expectTokenType('TableRow');
-            \assert(\array_key_exists('columns', $token));
 
             $table[$token['line']] = $token['columns'];
         }
@@ -653,10 +652,8 @@ class Parser
      * Changes step node type for types But, And to type of previous step if it exists else sets to Given.
      *
      * @param StepNode[] $steps
-     *
-     * @return StepNode
      */
-    private function normalizeStepNodeKeywordType(StepNode $node, array $steps = [])
+    private function normalizeStepNodeKeywordType(StepNode $node, array $steps = []): StepNode
     {
         if (!in_array($node->getKeywordType(), ['And', 'But'])) {
             return $node;

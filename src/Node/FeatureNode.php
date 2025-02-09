@@ -25,7 +25,7 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
 
     /**
      * @param list<string> $tags
-     * @param ScenarioInterface[] $scenarios
+     * @param list<ScenarioInterface> $scenarios
      * @param string|null $file the absolute path to the feature file
      */
     public function __construct(
@@ -45,21 +45,11 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         }
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Feature';
     }
 
-    /**
-     * Returns feature title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
@@ -123,18 +113,13 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
     /**
      * Returns feature scenarios.
      *
-     * @return ScenarioInterface[]
+     * @return list<ScenarioInterface>
      */
     public function getScenarios()
     {
         return $this->scenarios;
     }
 
-    /**
-     * Returns feature keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
@@ -160,11 +145,6 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         return $this->file;
     }
 
-    /**
-     * Returns feature declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
@@ -183,6 +163,24 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
             $this->tags,
             $this->background,
             array_values($scenarios),
+            $this->keyword,
+            $this->language,
+            $this->file,
+            $this->line,
+        );
+    }
+
+    /**
+     * Returns a copy of this feature but with a different description.
+     */
+    public function withDescription(?string $description): self
+    {
+        return new self(
+            $this->title,
+            $description,
+            $this->tags,
+            $this->background,
+            $this->scenarios,
             $this->keyword,
             $this->language,
             $this->file,

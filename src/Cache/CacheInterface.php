@@ -10,6 +10,7 @@
 
 namespace Behat\Gherkin\Cache;
 
+use Behat\Gherkin\Exception\CacheException;
 use Behat\Gherkin\Node\FeatureNode;
 
 /**
@@ -35,6 +36,8 @@ interface CacheInterface
      * @param string $path Feature path
      *
      * @return FeatureNode
+     *
+     * @throws CacheException
      */
     public function read($path);
 

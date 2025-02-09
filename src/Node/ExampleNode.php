@@ -44,21 +44,11 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Example';
     }
 
-    /**
-     * Returns node keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->getNodeType();
@@ -89,14 +79,9 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      */
     public function hasSteps()
     {
-        return count($this->outlineSteps) > 0;
+        return $this->outlineSteps !== [];
     }
 
-    /**
-     * Returns outline steps.
-     *
-     * @return list<StepNode>
-     */
     public function getSteps()
     {
         return $this->steps ??= $this->createExampleSteps();
@@ -112,11 +97,6 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
         return $this->tokens;
     }
 
-    /**
-     * Returns outline declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
@@ -134,7 +114,7 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
 
     public function getName(): ?string
     {
-        return "{$this->replaceTextTokens($this->outlineTitle)} #{$this->index}";
+        return "{$this->replaceTextTokens($this->outlineTitle ?? '')} #{$this->index}";
     }
 
     /**
@@ -147,6 +127,19 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     public function getExampleText(): string
     {
         return $this->text;
+    }
+
+    public function withSteps(array $steps): self
+    {
+        return new self(
+            $this->text,
+            $this->tags,
+            $steps,
+            $this->tokens,
+            $this->line,
+            $this->outlineTitle,
+            $this->index,
+        );
     }
 
     /**
@@ -198,16 +191,14 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      */
     protected function replaceTableArgumentTokens(TableNode $argument)
     {
-        $replacedTable = [];
-        foreach ($argument->getTable() as $line => $row) {
-            $replacedRow = [];
-            foreach ($row as $value) {
-                $replacedRow[] = $this->replaceTextTokens($value);
+        $table = $argument->getTable();
+        foreach ($table as &$row) {
+            foreach ($row as &$cell) {
+                $cell = $this->replaceTextTokens((string) $cell);
             }
-            $replacedTable[$line] = $replacedRow;
         }
 
-        return new TableNode($replacedTable);
+        return new TableNode($table);
     }
 
     /**

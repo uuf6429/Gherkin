@@ -132,7 +132,8 @@ final class ParserTest extends TestCase
 
         yield 'invalid content encoding' => [
             'expectedException' => new ParserException('Lexer exception "Feature file is not in UTF8 encoding" thrown for file /fake.feature'),
-            'featureText' => mb_convert_encoding('🔥 Все буде добре 🔥', 'EUC-JP', 'UTF-8'),
+            'featureText' => mb_convert_encoding('🔥 Все буде добре 🔥', 'EUC-JP', 'UTF-8')
+                ?: throw new \RuntimeException('Could not encode string data for testing successfully'),
         ];
 
         yield 'text content in background' => [

@@ -80,7 +80,7 @@ class GherkinFileLoader extends AbstractFileLoader
     {
         $path = $this->getAbsolutePath($resource);
         if ($this->cache) {
-            if ($this->cache->isFresh($path, filemtime($path))) {
+            if ($this->cache->isFresh($path, filemtime($path) ?: 0)) {
                 $feature = $this->cache->read($path);
             } elseif (null !== $feature = $this->parseFeature($path)) {
                 $this->cache->write($path, $feature);
@@ -102,6 +102,9 @@ class GherkinFileLoader extends AbstractFileLoader
     protected function parseFeature($path)
     {
         $content = file_get_contents($path);
+        if ($content === false) {
+            throw new \RuntimeException("File cannot be read: $path");
+        }
 
         return $this->parser->parse($content, $path);
     }

@@ -18,7 +18,7 @@ namespace Behat\Gherkin\Node;
 class PyStringNode implements ArgumentInterface
 {
     /**
-     * @param list<string> $strings String in form of [$stringLine]
+     * @param array<int, string> $strings String in form of [$stringLine]
      * @param int $line Line number where string been started
      */
     public function __construct(
@@ -27,11 +27,6 @@ class PyStringNode implements ArgumentInterface
     ) {
     }
 
-    /**
-     * Returns node type.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'PyString';
@@ -40,7 +35,7 @@ class PyStringNode implements ArgumentInterface
     /**
      * Returns entire PyString lines set.
      *
-     * @return list<string>
+     * @return array<int, string>
      */
     public function getStrings()
     {
@@ -67,11 +62,6 @@ class PyStringNode implements ArgumentInterface
         return $this->getRaw();
     }
 
-    /**
-     * Returns line number at which PyString was started.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

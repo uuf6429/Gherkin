@@ -31,7 +31,7 @@ abstract class AbstractFileLoader implements FileLoaderInterface
      */
     public function setBasePath($path)
     {
-        $this->basePath = realpath($path);
+        $this->basePath = ($realPath = realpath($path)) === false ? null : $realPath;
     }
 
     /**

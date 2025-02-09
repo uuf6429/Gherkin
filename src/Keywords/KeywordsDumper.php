@@ -18,9 +18,9 @@ namespace Behat\Gherkin\Keywords;
 class KeywordsDumper
 {
     /**
-     * @var callable(list<string>, bool): string
+     * @var callable(non-empty-list<string>, bool): string
      */
-    private $keywordsDumper;
+    private mixed $keywordsDumper;
 
     public function __construct(
         private readonly KeywordsInterface $keywords,
@@ -33,7 +33,7 @@ class KeywordsDumper
      *
      * Callable should accept 2 arguments (array $keywords and bool $isShort)
      *
-     * @param callable(list<string>, bool): string $mapper Mapper function
+     * @param callable(non-empty-list<string>, bool): string $mapper Mapper function
      *
      * @return void
      */
@@ -45,7 +45,7 @@ class KeywordsDumper
     /**
      * Defaults keywords dumper.
      *
-     * @param list<string> $keywords Keywords list
+     * @param non-empty-list<string> $keywords Keywords list
      * @param bool $isShort Is short version
      *
      * @return string
@@ -336,21 +336,19 @@ class KeywordsDumper
     {
         $dump = '';
 
-        $keywords = explode('|', $keywords);
+        $parsedKeywords = explode('|', $keywords);
         if ($short) {
-            $keywords = array_map(
-                function ($keyword) {
-                    return str_replace('<', '', $keyword);
-                },
-                $keywords
+            $parsedKeywords = array_map(
+                static fn ($keyword) => str_replace('<', '', $keyword),
+                $parsedKeywords
             );
-            $keywords = call_user_func($this->keywordsDumper, $keywords, $short);
+            $parsedKeywords = call_user_func($this->keywordsDumper, $parsedKeywords, $short);
             $dump .= <<<GHERKIN
-                {$keywords} {$text}
+                {$parsedKeywords} {$text}
 
             GHERKIN;
         } else {
-            foreach ($keywords as $keyword) {
+            foreach ($parsedKeywords as $keyword) {
                 if ($excludeAsterisk && $keyword === '*') {
                     continue;
                 }
