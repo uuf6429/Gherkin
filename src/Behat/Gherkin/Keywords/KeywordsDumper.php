@@ -17,17 +17,19 @@ namespace Behat\Gherkin\Keywords;
  */
 class KeywordsDumper
 {
-    private $keywords;
-    private $keywordsDumper;
+    /**
+     * @var callable(non-empty-list<string>, bool): string
+     */
+    private mixed $keywordsDumper;
 
     /**
      * Initializes dumper.
      *
      * @param KeywordsInterface $keywords Keywords instance
      */
-    public function __construct(KeywordsInterface $keywords)
-    {
-        $this->keywords = $keywords;
+    public function __construct(
+        private readonly KeywordsInterface $keywords,
+    ) {
         $this->keywordsDumper = [$this, 'dumpKeywords'];
     }
 
@@ -36,7 +38,9 @@ class KeywordsDumper
      *
      * Callable should accept 2 arguments (array $keywords and bool $isShort)
      *
-     * @param callable $mapper Mapper function
+     * @param callable(non-empty-list<string>, bool): string $mapper Mapper function
+     *
+     * @return void
      */
     public function setKeywordsDumperFunction($mapper)
     {
@@ -46,7 +50,7 @@ class KeywordsDumper
     /**
      * Defaults keywords dumper.
      *
-     * @param array $keywords Keywords list
+     * @param non-empty-list<string> $keywords Keywords list
      * @param bool $isShort Is short version
      *
      * @return string
@@ -101,6 +105,7 @@ class KeywordsDumper
      *
      * @param string $keyword Item keyword
      * @param bool $short Dump short version?
+     * @param bool $excludeAsterisk
      *
      * @return string
      */
@@ -157,6 +162,7 @@ class KeywordsDumper
      *
      * @param string $keyword Item keyword
      * @param bool $short Dump short version?
+     * @param bool $excludeAsterisk
      *
      * @return string
      */
@@ -191,6 +197,7 @@ class KeywordsDumper
      *
      * @param string $keyword Item keyword
      * @param bool $short Dump short version?
+     * @param bool $excludeAsterisk
      *
      * @return string
      */
@@ -249,6 +256,7 @@ class KeywordsDumper
      *
      * @param string $keyword Item keyword
      * @param bool $short Dump short version?
+     * @param bool $excludeAsterisk
      *
      * @return string
      */
@@ -323,6 +331,7 @@ class KeywordsDumper
      * @param string $keywords Item keyword
      * @param string $text Step text
      * @param bool $short Dump short version?
+     * @param bool $excludeAsterisk
      *
      * @return string
      */
@@ -330,21 +339,19 @@ class KeywordsDumper
     {
         $dump = '';
 
-        $keywords = explode('|', $keywords);
+        $parsedKeywords = explode('|', $keywords);
         if ($short) {
-            $keywords = array_map(
-                function ($keyword) {
-                    return str_replace('<', '', $keyword);
-                },
-                $keywords
+            $parsedKeywords = array_map(
+                static fn ($keyword) => str_replace('<', '', $keyword),
+                $parsedKeywords
             );
-            $keywords = call_user_func($this->keywordsDumper, $keywords, $short);
+            $parsedKeywords = call_user_func($this->keywordsDumper, $parsedKeywords, $short);
             $dump .= <<<GHERKIN
-                {$keywords} {$text}
+                {$parsedKeywords} {$text}
 
             GHERKIN;
         } else {
-            foreach ($keywords as $keyword) {
+            foreach ($parsedKeywords as $keyword) {
                 if ($excludeAsterisk && $keyword === '*') {
                     continue;
                 }

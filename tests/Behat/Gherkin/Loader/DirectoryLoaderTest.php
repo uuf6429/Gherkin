@@ -12,9 +12,9 @@ namespace Tests\Behat\Gherkin\Loader;
 
 use Behat\Gherkin\Gherkin;
 use Behat\Gherkin\Loader\DirectoryLoader;
+use Behat\Gherkin\Loader\GherkinFileLoader;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Behat\Gherkin\Loader\GherkinFileLoader;
 
 class DirectoryLoaderTest extends TestCase
 {
@@ -27,7 +27,7 @@ class DirectoryLoaderTest extends TestCase
         $this->gherkin = $this->createGherkinMock();
         $this->loader = new DirectoryLoader($this->gherkin);
 
-        $this->featuresPath = (string)realpath(__DIR__ . '/../Fixtures/directories');
+        $this->featuresPath = (string) realpath(__DIR__ . '/../Fixtures/directories');
     }
 
     protected function createGherkinMock(): MockObject&Gherkin

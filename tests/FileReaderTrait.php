@@ -1,10 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Behat Gherkin Parser.
+ * (c) Konstantin Kudryashov <ever.zet@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Tests;
 
 use RuntimeException;
 
-trait FileTrait
+trait FileReaderTrait
 {
     private static function readFile(string $filePath): string
     {
@@ -12,6 +20,7 @@ trait FileTrait
         if ($data === false) {
             throw new RuntimeException("Could not read file: $filePath");
         }
+
         return $data;
     }
 }

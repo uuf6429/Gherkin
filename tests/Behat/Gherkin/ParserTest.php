@@ -18,11 +18,11 @@ use Behat\Gherkin\Node\ScenarioNode;
 use Behat\Gherkin\Parser;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Tests\FileTrait;
+use Tests\FileReaderTrait;
 
 class ParserTest extends TestCase
 {
-    use FileTrait;
+    use FileReaderTrait;
 
     private Parser $gherkin;
     private YamlFileLoader $yaml;
@@ -143,6 +143,7 @@ class ParserTest extends TestCase
     protected function parseFixture(string $fixture): ?FeatureNode
     {
         $file = __DIR__ . "/Fixtures/features/$fixture";
+
         return $this->getGherkinParser()->parse(self::readFile($file), $file);
     }
 

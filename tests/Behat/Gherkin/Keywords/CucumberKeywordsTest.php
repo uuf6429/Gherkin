@@ -14,11 +14,11 @@ use Behat\Gherkin\Keywords\CucumberKeywords;
 use Behat\Gherkin\Keywords\KeywordsInterface;
 use Behat\Gherkin\Node\StepNode;
 use Symfony\Component\Yaml\Yaml;
-use Tests\FileTrait;
+use Tests\FileReaderTrait;
 
 class CucumberKeywordsTest extends KeywordsTestCase
 {
-    use FileTrait;
+    use FileReaderTrait;
 
     protected static function getKeywords(): KeywordsInterface
     {
@@ -29,6 +29,7 @@ class CucumberKeywordsTest extends KeywordsTestCase
     {
         $data = self::readFile(__DIR__ . '/../Fixtures/i18n.yml');
 
+        // @phpstan-ignore-next-line
         return Yaml::parse($data);
     }
 

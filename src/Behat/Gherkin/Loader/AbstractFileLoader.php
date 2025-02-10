@@ -17,6 +17,9 @@ namespace Behat\Gherkin\Loader;
  */
 abstract class AbstractFileLoader implements FileLoaderInterface
 {
+    /**
+     * @var string|null
+     */
     protected $basePath;
 
     /**
@@ -26,7 +29,7 @@ abstract class AbstractFileLoader implements FileLoaderInterface
      */
     public function setBasePath($path)
     {
-        $this->basePath = realpath($path);
+        $this->basePath = ($realPath = realpath($path)) === false ? null : $realPath;
     }
 
     /**

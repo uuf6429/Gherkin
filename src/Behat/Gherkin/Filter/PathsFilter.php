@@ -20,6 +20,9 @@ use Behat\Gherkin\Node\ScenarioInterface;
  */
 class PathsFilter extends SimpleFilter
 {
+    /**
+     * @var array<array-key, string>
+     */
     protected $filterPaths = [];
 
     /**
@@ -48,7 +51,10 @@ class PathsFilter extends SimpleFilter
     public function isFeatureMatch(FeatureNode $feature)
     {
         foreach ($this->filterPaths as $path) {
-            if (str_starts_with(realpath($feature->getFile()), $path)) {
+            if (($filePath = $feature->getFile()) !== null
+                && ($realPath = realpath($filePath)) !== false
+                && str_starts_with($realPath, $path)
+            ) {
                 return true;
             }
         }

@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 use SplFileInfo;
-use Tests\FileTrait;
+use Tests\FileReaderTrait;
 
 /**
  * Tests the parser against the upstream cucumber/gherkin test data.
@@ -32,7 +32,7 @@ use Tests\FileTrait;
  */
 class CompatibilityTest extends TestCase
 {
-    use FileTrait;
+    use FileReaderTrait;
 
     public const TESTDATA_PATH = __DIR__ . '/../../../../vendor/cucumber/cucumber/gherkin/testdata';
 

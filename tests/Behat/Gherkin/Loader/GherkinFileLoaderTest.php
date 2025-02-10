@@ -10,12 +10,12 @@
 
 namespace Tests\Behat\Gherkin\Loader;
 
+use Behat\Gherkin\Cache\CacheInterface;
 use Behat\Gherkin\Keywords\CucumberKeywords;
 use Behat\Gherkin\Lexer;
 use Behat\Gherkin\Loader\GherkinFileLoader;
 use Behat\Gherkin\Parser;
 use PHPUnit\Framework\TestCase;
-use Behat\Gherkin\Cache\CacheInterface;
 
 class GherkinFileLoaderTest extends TestCase
 {
@@ -28,7 +28,7 @@ class GherkinFileLoaderTest extends TestCase
         $parser = new Parser(new Lexer($keywords));
         $this->loader = new GherkinFileLoader($parser);
 
-        $this->featuresPath =(string) realpath(__DIR__ . '/../Fixtures/features');
+        $this->featuresPath = (string) realpath(__DIR__ . '/../Fixtures/features');
     }
 
     public function testSupports(): void

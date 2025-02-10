@@ -30,6 +30,8 @@ class TableNodeTest extends TestCase
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table row '0' is expected to be array, got string");
+
+        // @phpstan-ignore-next-line
         new TableNode([
             'everzet', 'antono',
         ]);
@@ -39,6 +41,8 @@ class TableNodeTest extends TestCase
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table cell at row '0', col '0' is expected to be scalar, got array");
+
+        // @phpstan-ignore-next-line
         new TableNode([
             [['everzet', 'antono']],
         ]);
@@ -48,6 +52,7 @@ class TableNodeTest extends TestCase
     {
         $this->expectException(NodeException::class);
         $this->expectExceptionMessage("Table row '1' is expected to have 2 columns, got 1");
+
         new TableNode([
             ['everzet', 'antono'],
             ['everzet'],

@@ -38,14 +38,15 @@ class Parser
 {
     private Lexer $lexer;
     private string $input;
-    private null|string $file;
+    private ?string $file;
     /**
      * @var list<string>
      */
     private array $tags = [];
     /**
      * @fixme It's not clear what sort of values are actually expected here.
-     * @var null|mixed
+     *
+     * @var mixed|null
      */
     private $languageSpecifierLine;
     /**
@@ -142,7 +143,7 @@ class Parser
      */
     protected function expectTokenType($type)
     {
-        $types = (array)$type;
+        $types = (array) $type;
         if (in_array($this->predictTokenType(), $types, true)) {
             return $this->lexer->getAdvancedToken();
         }
