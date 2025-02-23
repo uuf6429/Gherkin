@@ -15,7 +15,6 @@ use Behat\Gherkin\Keywords;
 use Behat\Gherkin\Lexer;
 use Behat\Gherkin\Loader\CucumberNDJsonAstLoader;
 use Behat\Gherkin\Node\FeatureNode;
-use Behat\Gherkin\Node\StepNode;
 use Behat\Gherkin\Parser;
 use FilesystemIterator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -23,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use RuntimeException;
 use SplFileInfo;
-use Tests\FileReaderTrait;
+use Tests\Behat\Gherkin\FileReaderTrait;
 
 /**
  * Tests the parser against the upstream cucumber/gherkin test data.
@@ -160,17 +159,10 @@ class CompatibilityTest extends TestCase
         }
 
         foreach ($featureNode->getScenarios() as $scenarioNode) {
-            $steps = array_map(
-                function (StepNode $step) {
-                    $this->setPrivateProperty($step, 'keywordType', '');
-                    $this->setPrivateProperty($step, 'arguments', []);
-
-                    return $step;
-                },
-                $scenarioNode->getSteps()
-            );
-
-            $this->setPrivateProperty($scenarioNode, 'steps', $steps);
+            foreach ($scenarioNode->getSteps() as $step) {
+                $this->setPrivateProperty($step, 'keywordType', '');
+                $this->setPrivateProperty($step, 'arguments', []);
+            }
         }
 
         return $featureNode;
