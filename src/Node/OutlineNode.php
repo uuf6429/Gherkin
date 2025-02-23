@@ -46,21 +46,11 @@ class OutlineNode implements ScenarioInterface
         $this->tables = is_array($tables) ? $tables : [$tables];
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Outline';
     }
 
-    /**
-     * Returns outline title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
@@ -71,21 +61,11 @@ class OutlineNode implements ScenarioInterface
         return $this->tags;
     }
 
-    /**
-     * Checks if outline has steps.
-     *
-     * @return bool
-     */
     public function hasSteps()
     {
-        return count($this->steps) > 0;
+        return $this->steps !== [];
     }
 
-    /**
-     * Returns outline steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
         return $this->steps;
@@ -147,21 +127,11 @@ class OutlineNode implements ScenarioInterface
         return $this->tables;
     }
 
-    /**
-     * Returns outline keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
     }
 
-    /**
-     * Returns outline declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

@@ -47,21 +47,11 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         }
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Feature';
     }
 
-    /**
-     * Returns feature title.
-     *
-     * @return string|null
-     */
     public function getTitle()
     {
         return $this->title;
@@ -132,11 +122,6 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         return $this->scenarios;
     }
 
-    /**
-     * Returns feature keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->keyword;
@@ -162,11 +147,6 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
         return $this->file;
     }
 
-    /**
-     * Returns feature declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

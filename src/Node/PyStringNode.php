@@ -29,11 +29,6 @@ class PyStringNode implements ArgumentInterface
     ) {
     }
 
-    /**
-     * Returns node type.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'PyString';
@@ -69,11 +64,6 @@ class PyStringNode implements ArgumentInterface
         return $this->getRaw();
     }
 
-    /**
-     * Returns line number at which PyString was started.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;

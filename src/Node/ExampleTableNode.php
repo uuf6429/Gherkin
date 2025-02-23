@@ -36,11 +36,6 @@ class ExampleTableNode extends TableNode implements TaggedNodeInterface
         parent::__construct($table);
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'ExampleTable';

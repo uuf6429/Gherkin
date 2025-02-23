@@ -121,11 +121,6 @@ class TableNode implements ArgumentInterface, IteratorAggregate
         return new self($list);
     }
 
-    /**
-     * Returns node type.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Table';
@@ -324,11 +319,6 @@ class TableNode implements ArgumentInterface, IteratorAggregate
         return implode("\n", $lines);
     }
 
-    /**
-     * Returns line number at which table was started.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->getRowLine(0);

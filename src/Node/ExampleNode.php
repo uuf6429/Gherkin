@@ -46,21 +46,11 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
     ) {
     }
 
-    /**
-     * Returns node type string.
-     *
-     * @return string
-     */
     public function getNodeType()
     {
         return 'Example';
     }
 
-    /**
-     * Returns node keyword.
-     *
-     * @return string
-     */
     public function getKeyword()
     {
         return $this->getNodeType();
@@ -91,17 +81,12 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      */
     public function hasSteps()
     {
-        return count($this->outlineSteps) > 0;
+        return $this->outlineSteps !== [];
     }
 
-    /**
-     * Returns outline steps.
-     *
-     * @return StepNode[]
-     */
     public function getSteps()
     {
-        return $this->steps = $this->steps ?: $this->createExampleSteps();
+        return $this->steps ??= $this->createExampleSteps();
     }
 
     /**
@@ -114,11 +99,6 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
         return $this->tokens;
     }
 
-    /**
-     * Returns outline declaration line number.
-     *
-     * @return int
-     */
     public function getLine()
     {
         return $this->line;
