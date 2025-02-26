@@ -31,11 +31,6 @@ use ReturnTypeWillChange;
 class TableNode implements ArgumentInterface, IteratorAggregate
 {
     /**
-     * @phpstan-var TTable
-     */
-    private array $table;
-
-    /**
      * @var array<array-key, int>
      */
     private array $maxLineLength = [];
@@ -47,8 +42,9 @@ class TableNode implements ArgumentInterface, IteratorAggregate
      *
      * @throws NodeException If the given table is invalid
      */
-    public function __construct(array $table)
-    {
+    public function __construct(
+        private array $table,
+    ) {
         $columnCount = null;
 
         foreach ($table as $rowLine => $row) {
@@ -95,8 +91,6 @@ class TableNode implements ArgumentInterface, IteratorAggregate
                 );
             }
         }
-
-        $this->table = $table;
     }
 
     /**
@@ -144,7 +138,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     public function getColumnsHash()
     {
         $rows = $this->getRows();
-        $keys = array_shift($rows);
+        $keys = array_map(strval(...), array_shift($rows) ?? []);
 
         $hash = [];
         foreach ($rows as $row) {

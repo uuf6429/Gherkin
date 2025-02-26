@@ -26,8 +26,8 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
     /**
      * Initializes feature.
      *
-     * @param string[] $tags
-     * @param ScenarioInterface[] $scenarios
+     * @param list<string> $tags
+     * @param list<ScenarioInterface> $scenarios
      * @param string|null $file the absolute path to the feature file
      */
     public function __construct(
@@ -115,7 +115,7 @@ class FeatureNode implements KeywordNodeInterface, TaggedNodeInterface
     /**
      * Returns feature scenarios.
      *
-     * @return ScenarioInterface[]
+     * @return list<ScenarioInterface>
      */
     public function getScenarios()
     {

@@ -27,6 +27,10 @@ use LogicException;
  * @phpstan-type TTokenType 'Text'|'Comment'|'EOS'|'Newline'|'PyStringOp'|'TableRow'|'Tag'|'Language'|TGeneralKeywordsType
  * @phpstan-type TTokenValue int|string|null
  * @phpstan-type TToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool}
+ * @phpstan-type TKeywordToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool, keyword: string, indent: int}
+ * @phpstan-type TStepToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool, keyword_type: string, text: string}
+ * @phpstan-type TTagToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool, tags: list<string>}
+ * @phpstan-type TTableRowToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool, columns: list<string>}
  */
 class Lexer
 {
@@ -315,7 +319,7 @@ class Lexer
      * @phpstan-param TKeywordsString $keywords Keywords (separated by "|")
      * @phpstan-param TTokenType $type Expected token type
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanInputForKeywords($keywords, $type)
     {
@@ -396,7 +400,7 @@ class Lexer
     /**
      * Scans Feature from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanFeature()
     {
@@ -406,7 +410,7 @@ class Lexer
     /**
      * Scans Background from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanBackground()
     {
@@ -416,7 +420,7 @@ class Lexer
     /**
      * Scans Scenario from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanScenario()
     {
@@ -426,7 +430,7 @@ class Lexer
     /**
      * Scans Scenario Outline from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanOutline()
     {
@@ -436,7 +440,7 @@ class Lexer
     /**
      * Scans Scenario Outline Examples from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TKeywordToken|null
      */
     protected function scanExamples()
     {
@@ -446,7 +450,7 @@ class Lexer
     /**
      * Scans Step from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TStepToken|null
      */
     protected function scanStep()
     {
@@ -526,7 +530,7 @@ class Lexer
     /**
      * Scans Table Row from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TTableRowToken|null
      */
     protected function scanTableRow()
     {
@@ -541,9 +545,10 @@ class Lexer
 
         $token = $this->takeToken('TableRow');
         $line = mb_substr($line, 1, mb_strlen($line, 'utf8') - 2, 'utf8');
-        $columns = array_map(function ($column) {
-            return trim(str_replace(['\\|', '\\\\'], ['|', '\\'], $column));
-        }, preg_split('/(?<!\\\)\|/u', $line) ?: []);
+        $columns = array_map(
+            static fn ($column) => trim(str_replace(['\\|', '\\\\'], ['|', '\\'], $column)),
+            preg_split('/(?<!\\\)\|/u', $line) ?: []
+        );
         $token['columns'] = $columns;
 
         $this->consumeLine();
@@ -554,7 +559,7 @@ class Lexer
     /**
      * Scans Tags from input & returns it if found.
      *
-     * @phpstan-return TToken|null
+     * @phpstan-return TTagToken|null
      */
     protected function scanTags()
     {
@@ -573,7 +578,7 @@ class Lexer
 
         $token = $this->takeToken('Tag');
         $tags = explode('@', mb_substr($line, 1, mb_strlen($line, 'utf8') - 1, 'utf8'));
-        $tags = array_map('trim', $tags);
+        $tags = array_map(trim(...), $tags);
         $token['tags'] = $tags;
 
         return $token;

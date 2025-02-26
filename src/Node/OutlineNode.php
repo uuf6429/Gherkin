@@ -31,8 +31,8 @@ class OutlineNode implements ScenarioInterface
     /**
      * Initializes outline.
      *
-     * @param string[] $tags
-     * @param StepNode[] $steps
+     * @param list<string> $tags
+     * @param list<StepNode> $steps
      * @param ExampleTableNode|array<array-key, ExampleTableNode> $tables
      */
     public function __construct(
@@ -167,7 +167,7 @@ class OutlineNode implements ScenarioInterface
                     $exampleTable->getRowAsString($rowNum + 1),
                     array_merge($this->tags, $exampleTable->getTags()),
                     $this->getSteps(),
-                    $row,
+                    array_map(strval(...), $row),
                     $exampleTable->getRowLine($rowNum + 1),
                     $this->getTitle(),
                     $rowNum + 1
