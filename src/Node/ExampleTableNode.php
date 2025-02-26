@@ -26,7 +26,7 @@ class ExampleTableNode extends TableNode implements TaggedNodeInterface
      *
      * @phpstan-param TTable $table Table in form of [$rowLineNumber => [$val1, $val2, $val3]]
      *
-     * @param string[] $tags
+     * @param list<string> $tags
      */
     public function __construct(
         array $table,

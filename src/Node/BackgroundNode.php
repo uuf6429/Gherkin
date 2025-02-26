@@ -20,7 +20,7 @@ class BackgroundNode implements ScenarioLikeInterface
     /**
      * Initializes background.
      *
-     * @param StepNode[] $steps
+     * @param list<StepNode> $steps
      */
     public function __construct(
         private readonly ?string $title,

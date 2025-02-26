@@ -28,8 +28,8 @@ class ExampleNode implements ScenarioInterface, NamedScenarioInterface
      * Initializes outline.
      *
      * @param string $text The entire row as a string, e.g. "| 1 | 2 | 3 |"
-     * @param array<array-key, string> $tags
-     * @param array<array-key, StepNode> $outlineSteps
+     * @param list<string> $tags
+     * @param list<StepNode> $outlineSteps
      * @param array<string, string> $tokens
      * @param int $line line number within the feature file
      * @param string|null $outlineTitle original title of the scenario outline
