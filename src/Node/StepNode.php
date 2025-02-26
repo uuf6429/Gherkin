@@ -33,9 +33,9 @@ class StepNode implements NodeInterface
     public function __construct(
         private readonly string $keyword,
         private readonly string $text,
-        array                   $arguments,
-        private readonly int    $line,
-        ?string                 $keywordType = null
+        array $arguments,
+        private readonly int $line,
+        ?string $keywordType = null,
     ) {
         if (count($arguments) > 1) {
             throw new NodeException(sprintf(

@@ -23,6 +23,7 @@ use LogicException;
  * @phpstan-import-type TKeywordsType from KeywordsInterface
  * @phpstan-import-type TStepKeywordsType from KeywordsInterface
  * @phpstan-import-type TGeneralKeywordsType from KeywordsInterface
+ *
  * @phpstan-type TTokenType 'Text'|'Comment'|'EOS'|'Newline'|'PyStringOp'|'TableRow'|'Tag'|'Language'|TGeneralKeywordsType
  * @phpstan-type TTokenValue int|string|null
  * @phpstan-type TToken array{type: TTokenType, value: TTokenValue, line: int, deferred: bool}
@@ -84,6 +85,7 @@ class Lexer
      *
      * @param string $input Input string
      * @param string $language Language name
+     *
      * @return void
      *
      * @throws LexerException
@@ -143,6 +145,7 @@ class Lexer
      * Defers token.
      *
      * @phpstan-param TToken $token Token to defer
+     *
      * @return void
      */
     public function deferToken(array $token)
@@ -289,6 +292,7 @@ class Lexer
      * Scans for token with specified regex.
      *
      * @param string $regex Regular expression
+     *
      * @phpstan-param TTokenType $type Expected token type
      *
      * @phpstan-return TToken|null
@@ -514,7 +518,7 @@ class Lexer
 
         $token = $this->scanText() ?? throw new LogicException('End of token stream encountered unexpectedly.');
         // swallow trailing spaces
-        $token['value'] = preg_replace('/^\s{0,' . $this->pyStringSwallow . '}/u', '', (string)($token['value'] ?? ''));
+        $token['value'] = preg_replace('/^\s{0,' . $this->pyStringSwallow . '}/u', '', (string) ($token['value'] ?? ''));
 
         return $token;
     }
