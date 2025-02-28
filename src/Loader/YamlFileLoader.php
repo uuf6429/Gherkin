@@ -58,6 +58,7 @@ class YamlFileLoader extends AbstractFileLoader
         }
         $hash = Yaml::parse($data);
 
+        // @phpstan-ignore-next-line
         $features = $this->loader->load($hash);
 
         return array_map(
