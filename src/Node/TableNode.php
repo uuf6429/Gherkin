@@ -133,7 +133,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by columns.
      *
-     * @phpstan-return list<array<string, TRow>>
+     * @phpstan-return list<array<string, TCell>>
      */
     public function getColumnsHash()
     {
