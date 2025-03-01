@@ -25,8 +25,9 @@ use ReturnTypeWillChange;
  * @phpstan-type TRowLine int
  * @phpstan-type TRow list<TCell>
  * @phpstan-type TTable array<TRowLine, TRow>
+ * @phpstan-type THash array<string, TCell>
  *
- * @phpstan-implements IteratorAggregate<array<string, TRow>>
+ * @phpstan-implements IteratorAggregate<THash>
  */
 class TableNode implements ArgumentInterface, IteratorAggregate
 {
@@ -96,7 +97,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Creates a table from a given list.
      *
-     * @param array $list One-dimensional array
+     * @phpstan-param array<int, TCell> $list One-dimensional array
      *
      * @return TableNode
      *
@@ -108,11 +109,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
             throw new NodeException('List is not a one-dimensional array.');
         }
 
-        array_walk($list, function (&$item) {
-            $item = [$item];
-        });
-
-        return new self($list);
+        return new self(array_map(static fn ($item) => [$item], $list));
     }
 
     public function getNodeType()
@@ -123,7 +120,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by columns (ColumnsHash).
      *
-     * @phpstan-return list<array<string, TRow>>
+     * @phpstan-return list<THash>
      */
     public function getHash()
     {
@@ -133,7 +130,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by columns.
      *
-     * @phpstan-return list<array<string, TCell>>
+     * @phpstan-return list<THash>
      */
     public function getColumnsHash()
     {
@@ -151,7 +148,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Returns table hash, formed by rows.
      *
-     * @return array
+     * @phpstan-return array<TCell, TCell|TRow>
      */
     public function getRowsHash()
     {
@@ -168,7 +165,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
      * Returns numerated table lines.
      * Line numbers are keys, lines are values.
      *
-     * @return array
+     * @phpstan-return TTable
      */
     public function getTable()
     {
@@ -200,7 +197,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
      *
      * @param int $index Row number
      *
-     * @return array
+     * @phpstan-return TRow
      *
      * @throws NodeException If row with specified index does not exist
      */
@@ -220,7 +217,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
      *
      * @param int $index Column number
      *
-     * @return array
+     * @phpstan-return list<TCell>
      *
      * @throws NodeException If column with specified index does not exist
      */
@@ -245,7 +242,7 @@ class TableNode implements ArgumentInterface, IteratorAggregate
      *
      * @param int $index
      *
-     * @return int
+     * @phpstan-return TRowLine
      *
      * @throws NodeException If row with specified index does not exist
      */
@@ -330,8 +327,6 @@ class TableNode implements ArgumentInterface, IteratorAggregate
 
     /**
      * Retrieves a hash iterator.
-     *
-     * @phpstan-return Iterator<array<string, TRow>>
      */
     #[ReturnTypeWillChange]
     public function getIterator()
@@ -342,6 +337,8 @@ class TableNode implements ArgumentInterface, IteratorAggregate
     /**
      * Obtains and adds rows from another table to the current table.
      * The second table should have the same structure as the current one.
+     *
+     * @return void
      *
      * @deprecated remove together with OutlineNode::getExampleTable
      */

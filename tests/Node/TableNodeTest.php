@@ -323,6 +323,8 @@ class TableNodeTest extends TestCase
     public function testGetTableFromListWithMultidimensionalArrayArgument(): void
     {
         $this->expectException(NodeException::class);
+
+        // @phpstan-ignore-next-line
         TableNode::fromList([
             [1, 2, 3],
             [4, 5, 6],

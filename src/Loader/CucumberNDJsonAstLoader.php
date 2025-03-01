@@ -10,6 +10,7 @@
 
 namespace Behat\Gherkin\Loader;
 
+use Behat\Gherkin\Exception\NodeException;
 use Behat\Gherkin\Node\BackgroundNode;
 use Behat\Gherkin\Node\ExampleTableNode;
 use Behat\Gherkin\Node\FeatureNode;
@@ -241,6 +242,15 @@ class CucumberNDJsonAstLoader implements LoaderInterface
         return array_map(
             static function (array $tableJson): ExampleTableNode {
                 $table = [];
+
+                if (!isset($tableJson['tableHeader'])) {
+                    throw new NodeException(
+                        sprintf(
+                            'Table header is required, but none was specified for the example on line %s.',
+                            $tableJson['location']['line'],
+                        )
+                    );
+                }
 
                 $table[$tableJson['tableHeader']['location']['line']] = array_column($tableJson['tableHeader']['cells'], 'value');
 
