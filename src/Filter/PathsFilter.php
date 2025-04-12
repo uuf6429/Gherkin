@@ -21,7 +21,7 @@ use Behat\Gherkin\Node\ScenarioInterface;
 class PathsFilter extends SimpleFilter
 {
     /**
-     * @var array<array-key, string>
+     * @var list<string>
      */
     protected $filterPaths = [];
 
@@ -41,13 +41,6 @@ class PathsFilter extends SimpleFilter
         }
     }
 
-    /**
-     * Checks if Feature matches specified filter.
-     *
-     * @param FeatureNode $feature Feature instance
-     *
-     * @return bool
-     */
     public function isFeatureMatch(FeatureNode $feature)
     {
         foreach ($this->filterPaths as $path) {
@@ -62,15 +55,9 @@ class PathsFilter extends SimpleFilter
         return false;
     }
 
-    /**
-     * Checks if scenario or outline matches specified filter.
-     *
-     * @param ScenarioInterface $scenario Scenario or Outline node instance
-     *
-     * @return false This filter is designed to work only with features
-     */
     public function isScenarioMatch(ScenarioInterface $scenario)
     {
+        // This filter does not apply to scenarios.
         return false;
     }
 }

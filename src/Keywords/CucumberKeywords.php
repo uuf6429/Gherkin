@@ -53,6 +53,10 @@ class CucumberKeywords extends ArrayKeywords
             throw $e;
         }
 
+        if (!is_array($content)) {
+            throw new ParseException(sprintf('Root element must be an array, but %s found.', get_debug_type($content)));
+        }
+
         // @phpstan-ignore-next-line
         parent::__construct($content);
     }

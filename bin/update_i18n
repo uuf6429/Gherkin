@@ -2,13 +2,13 @@
 <?php
 
 $gherkinFile = __DIR__ . '/../vendor/cucumber/cucumber/gherkin/gherkin-languages.json';
-$json  = file_get_contents($gherkinFile);
+$json = file_get_contents($gherkinFile) ?: '';
 $array = array();
 
-foreach (json_decode($json, true) as $lang => $keywords) {
+foreach ((array)json_decode($json, true) as $lang => $keywords) {
     $langMessages = array();
 
-    foreach ($keywords as $type => $words) {
+    foreach ((array)$keywords as $type => $words) {
         if (!is_array($words)) {
             $words = array($words);
         }
@@ -21,10 +21,11 @@ foreach (json_decode($json, true) as $lang => $keywords) {
             $formattedKeywords = array();
 
             foreach ($words as $word) {
+                assert(is_string($word));
                 $formattedWord = trim($word);
 
                 if ($formattedWord === $word) {
-                    $formattedWord = $formattedWord.'<'; // Convert the keywords to the syntax used by Gherkin 2, which is expected by our Lexer.
+                    $formattedWord .= '<'; // Convert the keywords to the syntax used by Gherkin 2, which is expected by our Lexer.
                 }
 
                 $formattedKeywords[] = $formattedWord;
@@ -33,7 +34,9 @@ foreach (json_decode($json, true) as $lang => $keywords) {
             $words = $formattedKeywords;
         }
 
-        usort($words, function($type1, $type2) {
+        usort($words, static function ($type1, $type2) {
+            assert(is_string($type1));
+            assert(is_string($type2));
             return [mb_strlen($type2, 'utf8'), $type1] <=> [mb_strlen($type1, 'utf8'), $type2];
         });
 
@@ -53,7 +56,7 @@ ksort($array);
 $array = array_merge(array('en' => $enData), $array);
 $arrayString = var_export($array, true);
 
-file_put_contents(__DIR__.'/../i18n.php', <<<EOD
+file_put_contents(__DIR__ . '/../i18n.php', <<<EOD
 <?php
 
 /*

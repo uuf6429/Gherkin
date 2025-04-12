@@ -13,6 +13,7 @@ namespace Tests\Behat\Gherkin\Keywords;
 use Behat\Gherkin\Keywords\CucumberKeywords;
 use Behat\Gherkin\Keywords\KeywordsInterface;
 use Behat\Gherkin\Node\StepNode;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Tests\Behat\Gherkin\FileReaderTrait;
 
@@ -45,5 +46,54 @@ class CucumberKeywordsTest extends KeywordsTestCase
         }
 
         return $steps;
+    }
+
+    public function testYamlSourceFileIsAttachedToException(): void
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test');
+
+        try {
+            file_put_contents($tempFile, "invalid:\n\tinvalid:yaml");
+
+            $this->expectExceptionObject(new ParseException(
+                'YAML file cannot contain tabs as indentation',
+                2,
+                "\tinvalid:yaml",
+                $tempFile,
+            ));
+
+            new CucumberKeywords($tempFile);
+        } finally {
+            @unlink($tempFile);
+        }
+    }
+
+    public function testYamlRootMustBeAnArray(): void
+    {
+        $this->expectException(ParseException::class);
+        $this->expectExceptionMessage('Root element must be an array, but string found.');
+
+        new CucumberKeywords("a\nstring");
+    }
+
+    public function testYamlFileMustBeReadable(): void
+    {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test');
+
+        try {
+            file_put_contents($tempFile, "aaa:\n  bbb: cccc");
+            if (PHP_OS_FAMILY === 'Windows') {
+                exec('icacls ' . escapeshellarg($tempFile) . ' /deny Everyone:(R)');
+            } else {
+                chmod($tempFile, 0);
+            }
+
+            $this->expectException(ParseException::class);
+            $this->expectExceptionMessage("Unable to parse \"$tempFile\" as the file is not readable.");
+
+            new CucumberKeywords($tempFile);
+        } finally {
+            @unlink($tempFile);
+        }
     }
 }
