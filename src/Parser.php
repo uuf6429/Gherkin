@@ -27,6 +27,7 @@ use Behat\Gherkin\Node\TableNode;
 
 /**
  * Gherkin parser.
+ *
  * ```
  * $lexer  = new Behat\Gherkin\Lexer($keywords);
  * $parser = new Behat\Gherkin\Parser($lexer);

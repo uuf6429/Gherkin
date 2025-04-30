@@ -35,6 +35,7 @@ class TableNodeTest extends TestCase
             new NodeException("Table row '0' is expected to be array, got string")
         );
 
+        // @phpstan-ignore-next-line argument.type
         new TableNode([
             'everzet', 'antono',
         ]);
@@ -46,6 +47,7 @@ class TableNodeTest extends TestCase
             new NodeException("Table cell at row '0', col '0' is expected to be scalar, got array")
         );
 
+        // @phpstan-ignore-next-line argument.type
         new TableNode([
             [['everzet', 'antono']],
         ]);
@@ -332,6 +334,7 @@ class TableNodeTest extends TestCase
             new NodeException('List is not a one-dimensional array.')
         );
 
+        // @phpstan-ignore-next-line argument.type
         TableNode::fromList([
             [1, 2, 3],
             [4, 5, 6],
